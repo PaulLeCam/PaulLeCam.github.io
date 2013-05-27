@@ -1,2 +1,1 @@
-Personal blog
-http://paullecam.github.io/
+Personal blog - http://paullecam.github.io
