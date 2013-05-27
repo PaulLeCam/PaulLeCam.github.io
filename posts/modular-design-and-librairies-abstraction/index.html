@@ -1,0 +1,45 @@
+<!DOCTYPE html><html lang="en"><head><!-- Meta--><meta charset="utf-8"><meta http-equiv="content-type" content="text/html; charset=utf-8"><meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1"><title>Modular design and librairies abstraction | Full-stack stuff</title><meta name="description" content="Personal blog about full-stack developement in JavaScript/CoffeeScript with Node, Require, Backbone, Handlebars..."><meta name="keywords" content="javascript, coffeescript, node, nodejs, require, requirejs, backbone, backbonejs, handlebars"><meta name="author" content="Paul Le Cam"><meta http-equiv="X-Powered-By" content="DocPad v6.35.0"/><meta name="viewport" content="width=device-width"><!-- Icons--><link rel="shortcut icon" href="ico/favicon.ico"><link rel="apple-touch-icon-precomposed" sizes="144x144" href="ico/apple-touch-icon-144-precomposed.png"><link rel="apple-touch-icon-precomposed" sizes="114x114" href="ico/apple-touch-icon-114-precomposed.png"><link rel="apple-touch-icon-precomposed" sizes="72x72" href="ico/apple-touch-icon-72-precomposed.png"><link rel="apple-touch-icon-precomposed" href="ico/apple-touch-icon-57-precomposed.png"><!--[if lt IE 9]><script async src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script><![endif]--><!-- Styles--><link  rel="stylesheet" href="/vendor/prettify.css" /><link  rel="stylesheet" href="/vendor/twitter-bootstrap/css/bootstrap.css" /><link  rel="stylesheet" href="/styles/style.css" /></head><body><header class="container"><h1><a href="/"><img src="/img/logo32.png">Full-stack stuff</a></h1></header><div class="main container"><div class="col col-lg-9"><div id="content"><article id="post" class="post"><h2 class="series">Client-side architecture, part 1</h2><h1>Modular design and librairies abstraction</h1><div class="meta clearfix"><i>May 27 2013</i></div><div class="post-content"><h2>Background</h2>
+<p>About a year ago, I started to use <a href="https://github.com/aurajs/aura">Aura</a> (Backbone-Aura at the time), a project by <a href="http://addyosmani.com/">Addy Osmani</a> to present a clean structure for client-side code, following <a href="http://www.nczonline.net/">Nicholas Zakas</a>&#39; principles introduced in <a href="http://www.slideshare.net/nzakas/scalable-javascript-application-architecture">this presentation</a>.
+I discovered it at a very convenient time for me, as I was starting to use Require and Backbone for all my client-side code, and Aura presented an interesting architecture for it, as well as implementing concepts from Zakas.</p>
+<p>At the time, the project was in version 0.7 and used Backbone as a framework. The core was very simple to understand and use, so even though it was not very modular, it was very easy to customize for my applications needs.
+Recent evolutions of Aura, with the release of version 0.9, unfortunately did not match my needs any more. The code feels more complex, and the choice to be used with any framework instead of only Backbone, if propbably interesting in a general manner, is more a constraint for me than anything.
+So instead of continuing to customize Aura according to my needs, I went back to the basics of the concepts, and I ended up using a dead-simple architecture that just does the job.</p>
+<h2>Using modules</h2>
+<p>This one is easy: Require does it for you.
+Define your modules with their dependencies, assemble them in one or different files in your build process using r.js optimizer, and dynamically load them in you code if you need.</p>
+<h2>The core - abstracting librairies</h2>
+<p>I use LoDash and jQuery in all my applications, so it felt like I would just need them anyway, but still I wanted to abstract them somehow beacuse, the same way I replaced underscore by LoDash, I could use Zepto instead of jQuery. I needed a way to make these changes in a single place of my application and be sure other modules depending on it would still work as expected.</p>
+<p>I ended-up splitting the librairies into core functionnalities I was using:</p>
+<ul>
+<li>util: common utilities, it is just and alias for LoDash</li>
+<li>template: alias for Handlebars</li>
+<li>dom: a subset of jQuery DOM functions, such as <code>find()</code>, <code>data()</code> and events (<code>on()</code>, <code>off()</code>, <code>ready()</code>...)</li>
+<li>http: a subset of jQuery AJAX functions, such as <code>$.ajax()</code>, <code>$.get()</code>, <code>$.post()</code>...</li>
+<li>promise: an alias to jQuery&#39;s <code>$.Deferred()</code> and <code>$.when()</code></li>
+<li>events: alias for Backbone&#39;s Events, with an <code>emit()</code> function aliasing to <code>trigger()</code> in order to match Node&#39;s EventEmitter</li>
+<li>mvc: alias for Backbone&#39;s Model, View and Collection</li>
+<li>routing: alias for Backbone&#39;s Router and <code>history.start()</code></li>
+</ul>
+<p>This way I could easily load dependencies in my modules in terms of functionalities instead of librairies, and already provide some form of sandboxing, as a module loading the <code>http</code> module would not have access to the <code>dom</code> functions, as it would if it had simply loaded jQuery, which is very useful to ensure the separation of concerns.</p>
+<p>I also added some of my own abstraction to these core modules:</p>
+<ul>
+<li>dev: an alias to the console having to be explicitely activated, with polyfills for <code>time()</code> and <code>timeEnd()</code></li>
+<li>store: a simple key/value store class with convenient methods</li>
+<li>command: an implementation of the command pattern using promises</li>
+</ul>
+<p>All these very simple modules then served as a basis for creating a modular framework, easily extensible, that I will present in an incoming post.</p>
+</div></article><footer></footer></div></div><aside class="col col-lg-3"><h2>About</h2><p>Hello, I'm Paul Le Cam, a Freelance full-stack Web developer from France focusing on modern JavaScript technologies. <a href="/pages/about">Learn more</a></p><p><a href="/pages/projects">View projects</a></p></aside></div><footer class="container"><div class="pull-right"><div class="twitter-follow-button social-button">
+	<a href="https://twitter.com/paul_lecam" class="twitter-follow-button" data-show-count="false">Follow @paul_lecam</a>
+	<script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0];if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src="//platform.twitter.com/widgets.js";fjs.parentNode.insertBefore(js,fjs);}}(document,"script","twitter-wjs");</script>
+</div><div class="github-follow-button social-button">
+	<iframe src="//ghbtns.com/github-btn.html?user=PaulLeCam&type=follow&count=true" allowtransparency="true" frameborder="0" scrolling="0" width="165" height="20"></iframe>
+</div></div><div>© Paul Le Cam 2013</div><div>Posts on this blog are licensed under a
+<a rel="license" href="http://creativecommons.org/licenses/by-nc-sa/3.0/" target="_blank">Creative Commons Attribution-NonCommercial-ShareAlike 3.0 Unported License</a>.<br />
+<a rel="license" href="http://creativecommons.org/licenses/by-nc-sa/3.0/" target="_blank"><img alt="Creative Commons License" style="border-width:0" src="http://i.creativecommons.org/l/by-nc-sa/3.0/88x31.png" /></a></div></footer><!-- Scripts--><script >var _gaq = _gaq || [];
+_gaq.push(['_setAccount', 'UA-39711178-1']);
+_gaq.push(['_trackPageview']);
+(function(){
+	var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+	ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+	var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+})();</script><script defer="defer"  src="/vendor/prettify.js"></script><script defer="defer"  src="/vendor/jquery.js"></script><script defer="defer"  src="/vendor/twitter-bootstrap/js/bootstrap.min.js"></script><script defer="defer"  src="/vendor/log.js"></script><script defer="defer"  src="/vendor/modernizr.js"></script><script defer="defer"  src="/scripts/script.js"></script></body></html>

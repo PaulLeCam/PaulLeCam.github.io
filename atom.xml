@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+  <title>Full-stack stuff</title>
+  <link href="http://paullecam.github.io/atom.xml" rel="self"/>
+  <link href="http://paullecam.github.io"/>
+  <updated>2013-05-27T16:58:03.581Z</updated>
+  <id>http://paullecam.github.io</id>
+  <author>
+    <name>Paul Le Cam</name>
+    <email>paul@ulem.net</email>
+  </author>
+
+  
+    <entry>
+      <title>Modular design and librairies abstraction</title>
+      <link href="http://paullecam.github.io//posts/modular-design-and-librairies-abstraction"/>
+      <updated>2013-05-27T16:53:55.000Z</updated>
+      <id>http://paullecam.github.io//posts/modular-design-and-librairies-abstraction</id>
+      <content type="html">&lt;!DOCTYPE html&gt;&lt;html lang=&quot;en&quot;&gt;&lt;head&gt;&lt;!-- Meta--&gt;&lt;meta charset=&quot;utf-8&quot;&gt;&lt;meta http-equiv=&quot;content-type&quot; content=&quot;text/html; charset=utf-8&quot;&gt;&lt;meta http-equiv=&quot;X-UA-Compatible&quot; content=&quot;IE=edge,chrome=1&quot;&gt;&lt;title&gt;Modular design and librairies abstraction | Full-stack stuff&lt;/title&gt;&lt;meta name=&quot;description&quot; content=&quot;Personal blog about full-stack developement in JavaScript/CoffeeScript with Node, Require, Backbone, Handlebars...&quot;&gt;&lt;meta name=&quot;keywords&quot; content=&quot;javascript, coffeescript, node, nodejs, require, requirejs, backbone, backbonejs, handlebars&quot;&gt;&lt;meta name=&quot;author&quot; content=&quot;Paul Le Cam&quot;&gt;&lt;meta http-equiv=&quot;X-Powered-By&quot; content=&quot;DocPad v6.35.0&quot;/&gt;&lt;meta name=&quot;viewport&quot; content=&quot;width=device-width&quot;&gt;&lt;!-- Icons--&gt;&lt;link rel=&quot;shortcut icon&quot; href=&quot;ico/favicon.ico&quot;&gt;&lt;link rel=&quot;apple-touch-icon-precomposed&quot; sizes=&quot;144x144&quot; href=&quot;ico/apple-touch-icon-144-precomposed.png&quot;&gt;&lt;link rel=&quot;apple-touch-icon-precomposed&quot; sizes=&quot;114x114&quot; href=&quot;ico/apple-touch-icon-114-precomposed.png&quot;&gt;&lt;link rel=&quot;apple-touch-icon-precomposed&quot; sizes=&quot;72x72&quot; href=&quot;ico/apple-touch-icon-72-precomposed.png&quot;&gt;&lt;link rel=&quot;apple-touch-icon-precomposed&quot; href=&quot;ico/apple-touch-icon-57-precomposed.png&quot;&gt;&lt;!--[if lt IE 9]&gt;&lt;script async src=&quot;http://html5shim.googlecode.com/svn/trunk/html5.js&quot;&gt;&lt;/script&gt;&lt;![endif]--&gt;&lt;!-- Styles--&gt;&lt;link  rel=&quot;stylesheet&quot; href=&quot;/vendor/prettify.css&quot; /&gt;&lt;link  rel=&quot;stylesheet&quot; href=&quot;/vendor/twitter-bootstrap/css/bootstrap.css&quot; /&gt;&lt;link  rel=&quot;stylesheet&quot; href=&quot;/styles/style.css&quot; /&gt;&lt;/head&gt;&lt;body&gt;&lt;header class=&quot;container&quot;&gt;&lt;h1&gt;&lt;a href=&quot;/&quot;&gt;&lt;img src=&quot;/img/logo32.png&quot;&gt;Full-stack stuff&lt;/a&gt;&lt;/h1&gt;&lt;/header&gt;&lt;div class=&quot;main container&quot;&gt;&lt;div class=&quot;col col-lg-9&quot;&gt;&lt;div id=&quot;content&quot;&gt;&lt;article id=&quot;post&quot; class=&quot;post&quot;&gt;&lt;h2 class=&quot;series&quot;&gt;Client-side architecture, part 1&lt;/h2&gt;&lt;h1&gt;Modular design and librairies abstraction&lt;/h1&gt;&lt;div class=&quot;meta clearfix&quot;&gt;&lt;i&gt;May 27 2013&lt;/i&gt;&lt;/div&gt;&lt;div class=&quot;post-content&quot;&gt;&lt;h2&gt;Background&lt;/h2&gt;
+&lt;p&gt;About a year ago, I started to use &lt;a href=&quot;https://github.com/aurajs/aura&quot;&gt;Aura&lt;/a&gt; (Backbone-Aura at the time), a project by &lt;a href=&quot;http://addyosmani.com/&quot;&gt;Addy Osmani&lt;/a&gt; to present a clean structure for client-side code, following &lt;a href=&quot;http://www.nczonline.net/&quot;&gt;Nicholas Zakas&lt;/a&gt;&amp;#39; principles introduced in &lt;a href=&quot;http://www.slideshare.net/nzakas/scalable-javascript-application-architecture&quot;&gt;this presentation&lt;/a&gt;.
+I discovered it at a very convenient time for me, as I was starting to use Require and Backbone for all my client-side code, and Aura presented an interesting architecture for it, as well as implementing concepts from Zakas.&lt;/p&gt;
+&lt;p&gt;At the time, the project was in version 0.7 and used Backbone as a framework. The core was very simple to understand and use, so even though it was not very modular, it was very easy to customize for my applications needs.
+Recent evolutions of Aura, with the release of version 0.9, unfortunately did not match my needs any more. The code feels more complex, and the choice to be used with any framework instead of only Backbone, if propbably interesting in a general manner, is more a constraint for me than anything.
+So instead of continuing to customize Aura according to my needs, I went back to the basics of the concepts, and I ended up using a dead-simple architecture that just does the job.&lt;/p&gt;
+&lt;h2&gt;Using modules&lt;/h2&gt;
+&lt;p&gt;This one is easy: Require does it for you.
+Define your modules with their dependencies, assemble them in one or different files in your build process using r.js optimizer, and dynamically load them in you code if you need.&lt;/p&gt;
+&lt;h2&gt;The core - abstracting librairies&lt;/h2&gt;
+&lt;p&gt;I use LoDash and jQuery in all my applications, so it felt like I would just need them anyway, but still I wanted to abstract them somehow beacuse, the same way I replaced underscore by LoDash, I could use Zepto instead of jQuery. I needed a way to make these changes in a single place of my application and be sure other modules depending on it would still work as expected.&lt;/p&gt;
+&lt;p&gt;I ended-up splitting the librairies into core functionnalities I was using:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;util: common utilities, it is just and alias for LoDash&lt;/li&gt;
+&lt;li&gt;template: alias for Handlebars&lt;/li&gt;
+&lt;li&gt;dom: a subset of jQuery DOM functions, such as &lt;code&gt;find()&lt;/code&gt;, &lt;code&gt;data()&lt;/code&gt; and events (&lt;code&gt;on()&lt;/code&gt;, &lt;code&gt;off()&lt;/code&gt;, &lt;code&gt;ready()&lt;/code&gt;...)&lt;/li&gt;
+&lt;li&gt;http: a subset of jQuery AJAX functions, such as &lt;code&gt;$.ajax()&lt;/code&gt;, &lt;code&gt;$.get()&lt;/code&gt;, &lt;code&gt;$.post()&lt;/code&gt;...&lt;/li&gt;
+&lt;li&gt;promise: an alias to jQuery&amp;#39;s &lt;code&gt;$.Deferred()&lt;/code&gt; and &lt;code&gt;$.when()&lt;/code&gt;&lt;/li&gt;
+&lt;li&gt;events: alias for Backbone&amp;#39;s Events, with an &lt;code&gt;emit()&lt;/code&gt; function aliasing to &lt;code&gt;trigger()&lt;/code&gt; in order to match Node&amp;#39;s EventEmitter&lt;/li&gt;
+&lt;li&gt;mvc: alias for Backbone&amp;#39;s Model, View and Collection&lt;/li&gt;
+&lt;li&gt;routing: alias for Backbone&amp;#39;s Router and &lt;code&gt;history.start()&lt;/code&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;This way I could easily load dependencies in my modules in terms of functionalities instead of librairies, and already provide some form of sandboxing, as a module loading the &lt;code&gt;http&lt;/code&gt; module would not have access to the &lt;code&gt;dom&lt;/code&gt; functions, as it would if it had simply loaded jQuery, which is very useful to ensure the separation of concerns.&lt;/p&gt;
+&lt;p&gt;I also added some of my own abstraction to these core modules:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;dev: an alias to the console having to be explicitely activated, with polyfills for &lt;code&gt;time()&lt;/code&gt; and &lt;code&gt;timeEnd()&lt;/code&gt;&lt;/li&gt;
+&lt;li&gt;store: a simple key/value store class with convenient methods&lt;/li&gt;
+&lt;li&gt;command: an implementation of the command pattern using promises&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;All these very simple modules then served as a basis for creating a modular framework, easily extensible, that I will present in an incoming post.&lt;/p&gt;
+&lt;/div&gt;&lt;/article&gt;&lt;footer&gt;&lt;/footer&gt;&lt;/div&gt;&lt;/div&gt;&lt;aside class=&quot;col col-lg-3&quot;&gt;&lt;h2&gt;About&lt;/h2&gt;&lt;p&gt;Hello, I'm Paul Le Cam, a Freelance full-stack Web developer from France focusing on modern JavaScript technologies. &lt;a href=&quot;/pages/about&quot;&gt;Learn more&lt;/a&gt;&lt;/p&gt;&lt;p&gt;&lt;a href=&quot;/pages/projects&quot;&gt;View projects&lt;/a&gt;&lt;/p&gt;&lt;/aside&gt;&lt;/div&gt;&lt;footer class=&quot;container&quot;&gt;&lt;div class=&quot;pull-right&quot;&gt;&lt;div class=&quot;twitter-follow-button social-button&quot;&gt;
+	&lt;a href=&quot;https://twitter.com/paul_lecam&quot; class=&quot;twitter-follow-button&quot; data-show-count=&quot;false&quot;&gt;Follow @paul_lecam&lt;/a&gt;
+	&lt;script&gt;!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0];if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src=&quot;//platform.twitter.com/widgets.js&quot;;fjs.parentNode.insertBefore(js,fjs);}}(document,&quot;script&quot;,&quot;twitter-wjs&quot;);&lt;/script&gt;
+&lt;/div&gt;&lt;div class=&quot;github-follow-button social-button&quot;&gt;
+	&lt;iframe src=&quot;//ghbtns.com/github-btn.html?user=PaulLeCam&amp;type=follow&amp;count=true&quot; allowtransparency=&quot;true&quot; frameborder=&quot;0&quot; scrolling=&quot;0&quot; width=&quot;165&quot; height=&quot;20&quot;&gt;&lt;/iframe&gt;
+&lt;/div&gt;&lt;/div&gt;&lt;div&gt;© Paul Le Cam 2013&lt;/div&gt;&lt;div&gt;Posts on this blog are licensed under a
+&lt;a rel=&quot;license&quot; href=&quot;http://creativecommons.org/licenses/by-nc-sa/3.0/&quot; target=&quot;_blank&quot;&gt;Creative Commons Attribution-NonCommercial-ShareAlike 3.0 Unported License&lt;/a&gt;.&lt;br /&gt;
+&lt;a rel=&quot;license&quot; href=&quot;http://creativecommons.org/licenses/by-nc-sa/3.0/&quot; target=&quot;_blank&quot;&gt;&lt;img alt=&quot;Creative Commons License&quot; style=&quot;border-width:0&quot; src=&quot;http://i.creativecommons.org/l/by-nc-sa/3.0/88x31.png&quot; /&gt;&lt;/a&gt;&lt;/div&gt;&lt;/footer&gt;&lt;!-- Scripts--&gt;&lt;script &gt;var _gaq = _gaq || [];
+_gaq.push(['_setAccount', 'UA-39711178-1']);
+_gaq.push(['_trackPageview']);
+(function(){
+	var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+	ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+	var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+})();&lt;/script&gt;&lt;script defer=&quot;defer&quot;  src=&quot;/vendor/prettify.js&quot;&gt;&lt;/script&gt;&lt;script defer=&quot;defer&quot;  src=&quot;/vendor/jquery.js&quot;&gt;&lt;/script&gt;&lt;script defer=&quot;defer&quot;  src=&quot;/vendor/twitter-bootstrap/js/bootstrap.min.js&quot;&gt;&lt;/script&gt;&lt;script defer=&quot;defer&quot;  src=&quot;/vendor/log.js&quot;&gt;&lt;/script&gt;&lt;script defer=&quot;defer&quot;  src=&quot;/vendor/modernizr.js&quot;&gt;&lt;/script&gt;&lt;script defer=&quot;defer&quot;  src=&quot;/scripts/script.js&quot;&gt;&lt;/script&gt;&lt;/body&gt;&lt;/html&gt;</content>
+    </entry>
+  
+</feed>
