@@ -1,0 +1,15 @@
+a,a:link{cursor:pointer;color:#5e6bc8;}
+a:hover,a:link:hover{text-decoration:none;color:#6acc28}
+body{background-color:#eee;font-size:1.6em}
+.main{border-top:2px solid #1836ff;border-bottom:2px solid #ff6026;background-color:#fff}
+header h1{margin-top:0;padding:20px 10px;text-shadow:0 3px 5px #333;}
+header h1 a{color:#fff;}
+header h1 a:hover{color:#fff}
+header h1 a img{margin-right:5px;margin-bottom:5px}
+aside{float:right;border-left:2px solid #6acc28;margin-left:-2px}
+footer{padding:20px 10px}
+h1,h2{line-height:auto}
+h2.series{color:#999;font-style:italic;font-size:1.8em;margin-bottom:0}
+.meta i{float:left;margin-right:20px}
+.pull-right .social-button{padding:12px 5px;float:left}
+#content .social-button{padding:2px;float:left}
