@@ -7,7 +7,7 @@ abstract: Presentation of an architecture made for abstraction and customization
 ---
 
 ## Background
-About a year ago, I started to use [Aura](https://github.com/aurajs/aura) (Backbone-Aura at the time), a project by [Addy Osmani](http://http://addyosmani.com/) to present a clean structure for client-side code, following [Nicholas Zakas](http://http://www.nczonline.net/)' principles introduced in [this presentation](http://www.slideshare.net/nzakas/scalable-javascript-application-architecture).
+About a year ago, I started to use [Aura](https://github.com/aurajs/aura) (Backbone-Aura at the time), a project by [Addy Osmani](http://addyosmani.com/) to present a clean structure for client-side code, following [Nicholas Zakas](http://www.nczonline.net/)' principles introduced in [this presentation](http://www.slideshare.net/nzakas/scalable-javascript-application-architecture).
 I discovered it at a very convenient time for me, as I was starting to use Require and Backbone for all my client-side code, and Aura presented an interesting architecture for it, as well as implementing concepts from Zakas.
 
 At the time, the project was in version 0.7 and used Backbone as a framework. The core was very simple to understand and use, so even though it was not very modular, it was very easy to customize for my applications needs.

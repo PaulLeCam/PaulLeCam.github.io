@@ -48,8 +48,5 @@
     "docpad-plugin-highlightjs": "~2.1.4",
     "docpad-plugin-services": "~2.2.4"
   },
-  "devDependencies": {
-    "docpad-plugin-livereload": "2.x"
-  },
   "main": "node_modules/docpad/bin/docpad-server"
 }
