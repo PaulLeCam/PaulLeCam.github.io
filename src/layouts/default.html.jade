@@ -9,8 +9,8 @@
 - scripts.add(["/vendor/jquery.js"])
 
 //- Bootstrap
-- scripts.add(["/vendor/twitter-bootstrap/js/bootstrap.js"])
-- styles.add(["/vendor/twitter-bootstrap/css/bootstrap.css","/vendor/twitter-bootstrap/css/bootstrap-responsive.css"])
+- scripts.add(["/vendor/twitter-bootstrap/js/bootstrap.min.js"])
+- styles.add(["/vendor/twitter-bootstrap/css/bootstrap.css"])
 
 //- Other Scripts
 - scripts.add(["/vendor/log.js","/vendor/modernizr.js"])
@@ -60,22 +60,33 @@ html(lang="en")
 
   body
 
-    // Markup
-    .navbar.navbar-fixed-top
-      .navbar-inner
-        .container
-          a.brand(href="/") Welcome
-          ul.nav
-            each doc in getCollection('pages').toJSON()
-              - clazz = (document.url === doc.url) ? 'active' : null
-              li(typeof="sioc:Page", about=doc.url, class=clazz)
-                a(href=doc.url, property="dc:title")= doc.title
-    .container
-      section#content.content!= content
-      hr
-      footer
-        div= site.copyright
-        div(style="font-style:italic; font-size: 12px") This website was last updated at #{site.date}
+    header.container
+      h1
+        a(href="/")
+          img(src="/img/logo32.png")
+          | Full-stack stuff
+
+    .main.container
+
+      if (typeof document.noside != "undefined" && document.noside)
+        .col.col-lg-12
+          #content!= content
+
+      else
+        .col.col-lg-9
+          #content!= content
+
+        aside.col.col-lg-3
+          h2 About
+          p Hello, I'm Paul Le Cam, a Freelance full-stack Web developer from France focusing on modern JavaScript technologies. 
+            a(href="/pages/about") Learn more
+          p
+            a(href="/pages/projects") View projects
+
+    footer.container
+      div.pull-right!= getSocialButtons(["TwitterFollow", "GithubFollow"])
+      div= site.copyright
+      div!= site.license
 
     // Scripts
     != scripts.toHTML()

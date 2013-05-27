@@ -1,12 +1,13 @@
 ---
 title: Posts
 layout: page
-pageOrder: 2
 ---
 
-nav.linklist
-  each doc in getCollection('posts').toJSON()
-    li
-      span= doc.date.toDateString()
-      |  &raquo;&nbsp;
-      a(href=doc.url)= doc.title
+each doc in getCollection('posts').toJSON()
+  h3
+    a(href=doc.url)= doc.title
+  p
+    i= moment(doc.date).format("LL")
+    - if (typeof doc.series != "undefined")
+      span  - #{doc.series}
+  p= doc.abstract

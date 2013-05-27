@@ -3,7 +3,12 @@ layout: default
 ---
 
 article#post.post
+  - if (typeof document.series != "undefined")
+    h2.series= document.series
   h1= document.title
+  .meta.clearfix
+    i= moment(document.date).format("LL")
+    //- != getSocialButtons(["TwitterTweet","HackerNewsSubmit"])
   .post-content!= content
 
 footer
@@ -13,6 +18,6 @@ footer
       nav.linklist
         each doc in document.relatedDocuments
           li
-            span= doc.date.toDateString()
+            span= moment(doc.date).format("LL")
             |  &raquo;&nbsp;
             a(href=doc.url)= doc.title

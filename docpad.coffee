@@ -12,35 +12,45 @@ docpadConfig =
     # Specify some site properties
     site:
       # The production url of our website
-      url: "http://website.com"
+      url: "http://paullecam.github.io"
 
       # Here are some old site urls that you would like to redirect from
-      oldUrls: [
-        'www.website.com',
-        'website.herokuapp.com'
-      ]
+      oldUrls: []
 
       # The default title of our website
-      title: "Your Website"
+      title: "Full-stack stuff"
 
       # The website description (for SEO)
       description: """
-        When your website appears in search results in say Google, the text here will be shown underneath your website's title.
+        Personal blog about full-stack developement in JavaScript/CoffeeScript with Node, Require, Backbone, Handlebars...
         """
 
       # The website keywords (for SEO) separated by commas
       keywords: """
-        place, your, website, keywoards, here, keep, them, related, to, the, content, of, your, website
+        javascript, coffeescript, node, nodejs, require, requirejs, backbone, backbonejs, handlebars
         """
 
       # The website author's name
-      author: "Your Name"
+      author: "Paul Le Cam"
 
       # The website author's email
-      email: "your@email.com"
+      email: "paul@ulem.net"
 
       # Your company's name
-      copyright: "© Your Company 2012"
+      copyright: "© Paul Le Cam 2013"
+
+      license: """
+        Posts on this blog are licensed under a
+        <a rel="license" href="http://creativecommons.org/licenses/by-nc-sa/3.0/" target="_blank">Creative Commons Attribution-NonCommercial-ShareAlike 3.0 Unported License</a>.<br />
+        <a rel="license" href="http://creativecommons.org/licenses/by-nc-sa/3.0/" target="_blank"><img alt="Creative Commons License" style="border-width:0" src="http://i.creativecommons.org/l/by-nc-sa/3.0/88x31.png" /></a>
+        """
+
+      services:
+        twitterTweetButton: "paul_lecam"
+        twitterFollowButton: "paul_lecam"
+        githubFollowButton: "PaulLeCam"
+        disqus: "paullecam"
+        googleAnalytics: "UA-39711178-1"
 
 
     # Helper Functions
@@ -66,6 +76,8 @@ docpadConfig =
     getPreparedKeywords: ->
       # Merge the document keywords with the site keywords
       @site.keywords.concat(@document.keywords or []).join(', ')
+
+    moment: require "moment"
 
 
   # Collections
