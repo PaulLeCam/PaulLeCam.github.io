@@ -1,0 +1,210 @@
+
+<html lang="en">
+  <head>
+    <!-- Meta-->
+    <meta charset="utf-8" />
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+    <title>Make your own framework | Full-stack stuff</title>
+    <meta name="description" content="Personal blog about full-stack developement in JavaScript/CoffeeScript with Node, Require, Backbone, Handlebars..." />
+    <meta name="keywords" content="javascript, coffeescript, node, nodejs, require, requirejs, backbone, backbonejs, handlebars" />
+    <meta name="author" content="Paul Le Cam" /><meta http-equiv="X-Powered-By" content="DocPad v6.36.0" />
+    <meta name="viewport" content="width=device-width" />
+    <!-- Icons-->
+    <link rel="shortcut icon" href="ico/favicon.ico" />
+    <link rel="apple-touch-icon-precomposed" sizes="144x144" href="ico/apple-touch-icon-144-precomposed.png" />
+    <link rel="apple-touch-icon-precomposed" sizes="114x114" href="ico/apple-touch-icon-114-precomposed.png" />
+    <link rel="apple-touch-icon-precomposed" sizes="72x72" href="ico/apple-touch-icon-72-precomposed.png" />
+    <link rel="apple-touch-icon-precomposed" href="ico/apple-touch-icon-57-precomposed.png" /><!--[if lt IE 9]>
+    <script async src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script><![endif]-->
+    <!-- Styles--><link rel="stylesheet" href="/vendor/prettify.css" /><link rel="stylesheet" href="/vendor/twitter-bootstrap/css/bootstrap.css" /><link rel="stylesheet" href="/styles/style.css" />
+  </head>
+  <body>
+    <header class="container">
+      <h1><a href="/"><img src="/img/logo32.png" />Full-stack stuff</a></h1>
+    </header>
+    <div class="main container">
+      <div class="col col-lg-9">
+        <div id="content">
+<article id="post" class="post">
+  <h2 class="series">Client-side architecture, part 2</h2>
+  <h1>Make your own framework</h1>
+  <div class="meta clearfix"><i>May 28 2013</i>
+  </div>
+  <div class="post-content"><h2>Background</h2>
+<p>In <a href="/posts/modular-design-and-librairies-abstraction/">part 1</a>, I presented a way to simply extract functions from different librairies, normalize and expose them in a modular way.
+The goal was to abstract these underlying librairies, in order to customize their behavior for the needs of the applications.</p>
+<h2>Extending Backbone and Handlebars</h2>
+<p><a href="http://backbonejs.org">Backbone</a> is a great framework presenting Model, View and Collection classes, and a router. I use it along with <a href="http://handlebarsjs.com">Handlebars</a> for templating. <a href="http://backstage.soundcloud.com/2012/06/building-the-next-soundcloud/">This article</a> from the SoundCloud engineering team presents some great ideas on how to push them further, most notably on two aspects I wanted to implement: sharing models between views, and rendering sub-views.</p>
+<h3>Sharing models</h3>
+<p>The idea of sharing models between views is that a specific model should not require to be instanciated multiple times.
+If you have an "user" model, it may be used by different views on the page, that my require different attributes from this model. Instead of creating the user model multiple times, we can ensure that only one exists for a specific <code>id</code>, and contains all the attributes we may need.
+Here is how I extend the Model constructor:</p>
+<pre class="highlighted"><code class="actionscript"># Each Model <span class="class"><span class="keyword">class</span> <span class="title">must</span> <span class="title">have</span> <span class="title">its</span> <span class="title">own</span> <span class="title">store</span> <span class="title">of</span> <span class="title">instances</span>
+<span class="title">store</span>: <span class="title">new</span> <span class="title">Store</span>
+
+# <span class="title">When</span> <span class="title">we</span> <span class="title">instanciate</span> <span class="title">a</span> <span class="title">model</span>, <span class="title">we</span> <span class="title">check</span> <span class="title">in</span> <span class="title">the</span> <span class="title">store</span> <span class="title">if</span> <span class="title">it</span> <span class="title">is</span> <span class="title">not</span> <span class="title">already</span> <span class="title">present</span>.
+# <span class="title">If</span> <span class="title">this</span> <span class="title">is</span> <span class="title">the</span> <span class="title">case</span>, <span class="title">we</span> <span class="title">silently</span> <span class="title">update</span> <span class="title">its</span> <span class="title">data</span>.
+<span class="title">constructor</span>: (<span class="title">params</span> = {</span>}) -&gt;
+  <span class="keyword">if</span> (id = params.id or params.cid) and self = @store.<span class="keyword">get</span> id
+    self.<span class="keyword">set</span> params, silent: yes
+    <span class="keyword">return</span> self
+
+  <span class="keyword">super</span> params
+  key = @id ? @cid
+  @store.<span class="keyword">set</span> key, @</code></pre>
+<p>This is very basic: every Model contains an internal registry, <code>@store</code>, that contains its instances identified by <code>id</code> or <code>cid</code>. If the instance is present in the registry, it gets updated with possible new data and directly returned. Otherwise, it is normally creted and added to the registry.
+As stated in the SoundCloud engineering blog post, it is an application of the factory pattern directly in the constructor, allowing to simply use <code>user = new User(id: 123)</code> and actually retrieve the user with all the attributes previously set.</p>
+<h3>Rendering sub-views</h3>
+<p>A limit often presented with Backbone is the ability to simply render sub-views, meaning for example the ability to render each item in a list when rendering the list, and ensuring the events are correctly bound.
+This is why I augment Handlebars (the <code>template</code> object in the following code) with custom functions to ensure this goal:</p>
+<pre class="highlighted"><code class="sql"># Local store for subviews
+subviews = new Store
+
+# Add a view to the local store and return a DOM element that we can identify
+template.addSubView = (view) -&gt;
+  subviews.<span class="operator"><span class="keyword">set</span> <span class="keyword">view</span>.cid, <span class="keyword">view</span>
+  new template.SafeString <span class="string">"&lt;view data-cid=\"#{ view.cid }\"&gt;&lt;/view&gt;"</span>
+
+# Return the DOM element <span class="keyword">of</span> a stored <span class="keyword">view</span> <span class="keyword">and</span> <span class="keyword">delete</span> it <span class="keyword">from</span> the store
+template.renderSubView = (cid) -&gt;
+  if <span class="keyword">view</span> = subviews.<span class="keyword">get</span> cid
+    subviews.<span class="keyword">delete</span> cid
+    <span class="keyword">view</span>.render().el
+  <span class="keyword">else</span> <span class="string">""</span>
+
+# Render <span class="keyword">all</span> subviews present <span class="keyword">in</span> a DOM element identified <span class="keyword">by</span> a jQuery object
+template.renderSubViews = ($el) -&gt;
+  $el.find(<span class="string">"view"</span>).each (i, <span class="keyword">view</span>) -&gt;
+    $<span class="keyword">view</span> = $el.find <span class="keyword">view</span>
+    $<span class="keyword">view</span>.replaceWith template.renderSubView $<span class="keyword">view</span>.data <span class="string">"cid"</span></span></code></pre>
+<p>First, we need to store the sub-view of the item and return a placeholder <code>view</code> element for the list to render.
+Then, once the list is rendered, we call <code>renderSubViews()</code> on its element to iterate through the placeholders and replace them with the actual item view content.</p>
+<p>This last function is then used in a method added to the View class:</p>
+<pre class="highlighted"><code class="mel"># The <span class="string">`renderer()`</span> set the HTML content <span class="keyword">for</span> the element and <span class="keyword">render</span> eventual associated subviews
+<span class="keyword">renderer</span>: (html) -&gt;
+  <span class="variable">@$</span>el
+    .attr(<span class="string">"data-view"</span>, <span class="variable">@cid</span>)
+    .html html
+  template.renderSubViews <span class="variable">@$</span>el
+  @</code></pre>
+<p>Here is a full (simple but not tested) example:</p>
+<pre class="highlighted"><code class="php"><span class="class"><span class="keyword">class</span> <span class="title">ItemView</span> <span class="keyword">extends</span> <span class="title">View</span>
+
+  <span class="title">tmpl</span>: <span class="title">template</span>.<span class="title">compile</span> """
+    &lt;<span class="title">a</span> <span class="title">href</span>="{</span>{uri}}<span class="string">"&gt;{{label}}&lt;/a&gt;
+    "</span><span class="string">""</span>
+
+  events:
+    <span class="string">"click"</span>: <span class="string">"onClick"</span>
+
+  onClick: -&gt;
+    console.log <span class="string">"clicked item"</span>, @options
+
+  render: -&gt;
+    @<span class="variable">$el</span>.html @tmpl @options
+    @
+
+template.registerHelper <span class="string">"renderItem"</span>, (data = {}) -&gt;
+  template.addSubView <span class="keyword">new</span> ItemView data
+
+<span class="class"><span class="keyword">class</span> <span class="title">ListView</span> <span class="keyword">extends</span> <span class="title">View</span>
+
+  <span class="title">tmpl</span>: <span class="title">template</span>.<span class="title">compile</span> """
+    &lt;<span class="title">ul</span>&gt;
+      {</span>{<span class="comment">#each items}}</span>
+        &lt;li&gt;{{renderItem <span class="keyword">this</span>}}&lt;/li&gt;
+      {{/each}}
+    &lt;/ul&gt;
+    <span class="string">""</span><span class="string">"
+
+  el: "</span><span class="comment">#myList"</span>
+
+  render: -&gt;
+    @renderer @tmpl @options
+
+items = [
+  {uri: <span class="string">"uri1"</span>, label: <span class="string">"label1"</span>}
+  {uri: <span class="string">"uri2"</span>, label: <span class="string">"label2"</span>}
+  {uri: <span class="string">"uri3"</span>, label: <span class="string">"label3"</span>}
+]
+<span class="keyword">new</span> ListView({items}).render()</code></pre>
+<h2>Working with widgets</h2>
+<ul>
+<li>Aura background</li>
+<li><p>Widgets + management</p>
+</li>
+<li><p>Sandboxes</p>
+</li>
+</ul>
+</div>
+</article>
+<footer>
+</footer></div>
+      </div>
+      <aside class="col col-lg-3">
+        <h2>About</h2>
+        <p>Hello, I'm Paul, a Freelance full-stack Web developer from France focusing on modern JavaScript technologies. <a href="/pages/about">Learn more</a></p>
+        <p><a href="/pages/projects">View projects</a></p>
+      </aside>
+    </div>
+    <footer class="container">
+      <div class="pull-right"><div class="twitter-follow-button social-button">
+	<a href="https://twitter.com/paul_lecam" class="twitter-follow-button" data-show-count="false">Follow @paul_lecam</a>
+	<script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0];if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src="//platform.twitter.com/widgets.js";fjs.parentNode.insertBefore(js,fjs);}}(document,"script","twitter-wjs");</script>
+</div><div class="github-follow-button social-button">
+	<iframe src="//ghbtns.com/github-btn.html?user=PaulLeCam&amp;type=follow&amp;count=true" allowtransparency="true" frameborder="0" scrolling="0" width="165" height="20"></iframe>
+</div></div>
+      <div>© Paul Le Cam 2013</div>
+      <div>Posts on this blog are licensed under a
+<a rel="license" href="http://creativecommons.org/licenses/by-nc-sa/3.0/" target="_blank">Creative Commons Attribution-NonCommercial-ShareAlike 3.0 Unported License</a>.<br />
+<a rel="license" href="http://creativecommons.org/licenses/by-nc-sa/3.0/" target="_blank"><img alt="Creative Commons License" style="border-width:0" src="http://i.creativecommons.org/l/by-nc-sa/3.0/88x31.png" /></a></div>
+    </footer>
+    <!-- Scripts--><script>(function(){
+	/* Did we just livereload? */
+var log = true && localStorage && console && console.log && true;
+if ( log && localStorage.getItem('/docpad-livereload/reloaded') === 'yes' ) {
+	localStorage.removeItem('/docpad-livereload/reloaded');
+	console.log('LiveReloaded at', new Date())
+}
+
+/* Listen for the regenerated event and perform a reload of the page when the event occurs */
+var listen = function(){
+	var socket = io.connect('/docpad-livereload');
+	socket.on('regenerated',function(){
+		if ( log ) {
+	localStorage.setItem('/docpad-livereload/reloaded', 'yes');
+}
+document.location.reload();
+	});
+};
+	if ( typeof io !== 'undefined' ) {
+		listen();
+	} else {
+		/* Inject socket.io into our page then listen once loaded */
+var inject = function(){
+	var t = document.createElement('script');
+	t.type = 'text/javascript';
+	t.async = true;
+	t.src = '/socket.io/socket.io.js';
+	t.onload = listen;
+	var s = document.getElementsByTagName('script')[0];
+	s.parentNode.insertBefore(t,s);
+};
+		var readyStateCheckInterval = setInterval(function() {
+  if (document.readyState === "complete") {
+    inject();
+    clearInterval(readyStateCheckInterval);
+  }
+}, 10);
+	}
+})();</script><script>var _gaq = _gaq || [];
+_gaq.push(['_setAccount', 'UA-39711178-1']);
+_gaq.push(['_trackPageview']);
+(function(){
+	var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+	ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+	var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+})();</script><script defer="defer" src="/vendor/prettify.js"></script><script defer="defer" src="/vendor/jquery.js"></script><script defer="defer" src="/vendor/twitter-bootstrap/js/bootstrap.min.js"></script><script defer="defer" src="/vendor/log.js"></script><script defer="defer" src="/vendor/modernizr.js"></script><script defer="defer" src="/scripts/script.js"></script>
+  </body>
+</html>

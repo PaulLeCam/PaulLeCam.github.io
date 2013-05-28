@@ -1,0 +1,121 @@
+<html lang="en"><head><!-- Meta--><meta charset="utf-8" /><meta http-equiv="content-type" content="text/html; charset=utf-8" /><meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" /><title>Make your own framework | Full-stack stuff</title><meta name="description" content="Personal blog about full-stack developement in JavaScript/CoffeeScript with Node, Require, Backbone, Handlebars..." /><meta name="keywords" content="javascript, coffeescript, node, nodejs, require, requirejs, backbone, backbonejs, handlebars" /><meta name="author" content="Paul Le Cam" /><meta http-equiv="X-Powered-By" content="DocPad v6.35.0" /><meta name="viewport" content="width=device-width" /><!-- Icons--><link rel="shortcut icon" href="ico/favicon.ico" /><link rel="apple-touch-icon-precomposed" sizes="144x144" href="ico/apple-touch-icon-144-precomposed.png" /><link rel="apple-touch-icon-precomposed" sizes="114x114" href="ico/apple-touch-icon-114-precomposed.png" /><link rel="apple-touch-icon-precomposed" sizes="72x72" href="ico/apple-touch-icon-72-precomposed.png" /><link rel="apple-touch-icon-precomposed" href="ico/apple-touch-icon-57-precomposed.png" /><!--[if lt IE 9]><script async src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script><![endif]--><!-- Styles--><link rel="stylesheet" href="/vendor/prettify.css" /><link rel="stylesheet" href="/vendor/twitter-bootstrap/css/bootstrap.css" /><link rel="stylesheet" href="/styles/style.css" /></head><body><header class="container"><h1><a href="/"><img src="/img/logo32.png" />Full-stack stuff</a></h1></header><div class="main container"><div class="col col-lg-9"><div id="content"><article id="post" class="post"><h2 class="series">Client-side architecture, part 2</h2><h1>Make your own framework</h1><div class="meta clearfix"><i>May 28 2013</i></div><div class="post-content"><h2>Background</h2>
+<p>In <a href="/posts/modular-design-and-librairies-abstraction/">part 1</a>, I presented a way to simply extract functions from different librairies, normalize and expose them in a modular way.
+The goal was to abstract these underlying librairies, in order to customize their behavior for the needs of the applications.</p>
+<h2>Extending Backbone and Handlebars</h2>
+<p><a href="http://backbonejs.org">Backbone</a> is a great framework presenting Model, View and Collection classes, and a router. I use it along with <a href="http://handlebarsjs.com">Handlebars</a> for templating.</p>
+<p><a href="http://backstage.soundcloud.com/2012/06/building-the-next-soundcloud/">This article</a> from the SoundCloud engineering team presents some great ideas on how to push them further, most notably on two aspects I wanted to implement: sharing models between views, and rendering sub-views.</p>
+<h3>Sharing models</h3>
+<p>The idea of sharing models between views is that a specific model should not require to be instanciated multiple times.</p>
+<p>If you have an "user" model, it may be used by different views on the page, that may require different attributes from this model. Instead of creating the user model multiple times, we can ensure that only one exists for a specific <code>id</code>, and contains all the attributes we may need.</p>
+<p>Here is how I extend the Model constructor:</p>
+<div class="highlight highlighted codehilite"><span class="cp"># Each Model class must have its own store of instances</span>
+<span class="nl">store:</span> <span class="n">new</span> <span class="n">Store</span>
+
+<span class="cp"># When we instanciate a model, we check in the store if it is not already present.</span>
+<span class="cp"># If this is the case, we silently update its data.</span>
+<span class="nl">constructor:</span> <span class="p">(</span><span class="n">params</span> <span class="o">=</span> <span class="p">{})</span> <span class="o">-&amp;</span><span class="n">gt</span><span class="p">;</span>
+  <span class="k">if</span> <span class="p">(</span><span class="n">id</span> <span class="o">=</span> <span class="n">params</span><span class="p">.</span><span class="n">id</span> <span class="n">or</span> <span class="n">params</span><span class="p">.</span><span class="n">cid</span><span class="p">)</span> <span class="n">and</span> <span class="n">self</span> <span class="o">=</span> <span class="err">@</span><span class="n">store</span><span class="p">.</span><span class="n">get</span> <span class="n">id</span>
+    <span class="n">self</span><span class="p">.</span><span class="n">set</span> <span class="n">params</span><span class="p">,</span> <span class="n">silent</span><span class="o">:</span> <span class="n">yes</span>
+    <span class="k">return</span> <span class="n">self</span>
+
+  <span class="n">super</span> <span class="n">params</span>
+  <span class="n">key</span> <span class="o">=</span> <span class="err">@</span><span class="n">id</span> <span class="o">?</span> <span class="err">@</span><span class="n">cid</span>
+  <span class="err">@</span><span class="n">store</span><span class="p">.</span><span class="n">set</span> <span class="n">key</span><span class="p">,</span> <span class="err">@</span>
+</div>
+<p>This is very basic: every Model contains an internal registry, <code>@store</code>, that contains its instances identified by <code>id</code> or <code>cid</code>. If the instance is present in the registry, it gets updated with possible new data and directly returned. Otherwise, it is normally created and added to the registry.</p>
+<p>As stated in the SoundCloud engineering blog post, it is an application of the <a href="http://addyosmani.com/resources/essentialjsdesignpatterns/book/#factorypatternjavascript">factory pattern</a> directly in the constructor, allowing to simply use <code>user = new User(id: 123)</code> and actually retrieve the user with all the attributes previously set.</p>
+<p>Note that, again as stated in the article, this may not be very memory-efficient and a more advanced caching system would be interesting to auto-delete unused instances after some time.</p>
+<h3>Rendering sub-views</h3>
+<p>A limit often presented with Backbone is the ability to simply render sub-views, meaning for example the ability to render each item in a list when rendering the list, and ensuring the events are correctly bound.</p>
+<p>This is why I augment Handlebars (the <code>template</code> object in the following code) with custom functions to ensure this goal:</p>
+<div class="highlight highlighted codehilite"><span class="cp"># Local store for subviews</span>
+<span class="n">subviews</span> <span class="o">=</span> <span class="n">new</span> <span class="n">Store</span>
+
+<span class="cp"># Add a view to the local store and return a DOM element that we can identify</span>
+<span class="n">template</span><span class="p">.</span><span class="n">addSubView</span> <span class="o">=</span> <span class="p">(</span><span class="n">view</span><span class="p">)</span> <span class="o">-&amp;</span><span class="n">gt</span><span class="p">;</span>
+  <span class="n">subviews</span><span class="p">.</span><span class="n">set</span> <span class="n">view</span><span class="p">.</span><span class="n">cid</span><span class="p">,</span> <span class="n">view</span>
+  <span class="n">new</span> <span class="n">template</span><span class="p">.</span><span class="n">SafeString</span> <span class="s">"&amp;lt;view data-cid=</span><span class="se">\"</span><span class="s">#{ view.cid }</span><span class="se">\"</span><span class="s">&amp;gt;&amp;lt;/view&amp;gt;"</span>
+
+<span class="cp"># Return the DOM element of a stored view and delete it from the store</span>
+<span class="n">template</span><span class="p">.</span><span class="n">renderSubView</span> <span class="o">=</span> <span class="p">(</span><span class="n">cid</span><span class="p">)</span> <span class="o">-&amp;</span><span class="n">gt</span><span class="p">;</span>
+  <span class="k">if</span> <span class="n">view</span> <span class="o">=</span> <span class="n">subviews</span><span class="p">.</span><span class="n">get</span> <span class="n">cid</span>
+    <span class="n">subviews</span><span class="p">.</span><span class="n">delete</span> <span class="n">cid</span>
+    <span class="n">view</span><span class="p">.</span><span class="n">render</span><span class="p">().</span><span class="n">el</span>
+  <span class="k">else</span> <span class="s">""</span>
+
+<span class="cp"># Render all subviews present in a DOM element identified by a jQuery object</span>
+<span class="n">template</span><span class="p">.</span><span class="n">renderSubViews</span> <span class="o">=</span> <span class="p">(</span><span class="err">$</span><span class="n">el</span><span class="p">)</span> <span class="o">-&amp;</span><span class="n">gt</span><span class="p">;</span>
+  <span class="err">$</span><span class="n">el</span><span class="p">.</span><span class="n">find</span><span class="p">(</span><span class="s">"view"</span><span class="p">).</span><span class="n">each</span> <span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">view</span><span class="p">)</span> <span class="o">-&amp;</span><span class="n">gt</span><span class="p">;</span>
+    <span class="err">$</span><span class="n">view</span> <span class="o">=</span> <span class="err">$</span><span class="n">el</span><span class="p">.</span><span class="n">find</span> <span class="n">view</span>
+    <span class="err">$</span><span class="n">view</span><span class="p">.</span><span class="n">replaceWith</span> <span class="n">template</span><span class="p">.</span><span class="n">renderSubView</span> <span class="err">$</span><span class="n">view</span><span class="p">.</span><span class="n">data</span> <span class="s">"cid"</span>
+</div>
+<p>First, we need to store the sub-view of the item and return a placeholder <code>view</code> element for the list to render.</p>
+<p>Then, once the list is rendered, we call <code>renderSubViews()</code> on its element to iterate through the placeholders and replace them with the actual item content.</p>
+<p>This last function is then used in a method added to the View class:</p>
+<div class="highlight highlighted codehilite"><span class="cp"># The `renderer()` set the HTML content for the element and render eventual associated subviews</span>
+<span class="nl">renderer:</span> <span class="p">(</span><span class="n">html</span><span class="p">)</span> <span class="o">-&amp;</span><span class="n">gt</span><span class="p">;</span>
+  <span class="err">@$</span><span class="n">el</span>
+    <span class="p">.</span><span class="n">attr</span><span class="p">(</span><span class="s">"data-view"</span><span class="p">,</span> <span class="err">@</span><span class="n">cid</span><span class="p">)</span>
+    <span class="p">.</span><span class="n">html</span> <span class="n">html</span>
+  <span class="n">template</span><span class="p">.</span><span class="n">renderSubViews</span> <span class="err">@$</span><span class="n">el</span>
+  <span class="err">@</span>
+</div>
+<p>Here is a full (simple but not tested) example:</p>
+<div class="highlight highlighted codehilite"><span class="nt">class</span> <span class="nt">ItemView</span> <span class="nt">extends</span> <span class="nt">View</span>
+
+<span class="nt">tmpl</span><span class="o">:</span> <span class="nt">template</span><span class="nc">.compile</span> <span class="s2">"""</span>
+<span class="s2">  &amp;lt;a href="</span><span class="p">{</span><span class="err">{</span><span class="n">uri</span><span class="p">}</span><span class="err">}</span><span class="s2">"&amp;gt;{{label}}&amp;lt;/a&amp;gt;</span>
+<span class="s2">  """</span>
+
+<span class="nt">events</span><span class="o">:</span>
+  <span class="s2">"click"</span><span class="o">:</span> <span class="s2">"onClick"</span>
+
+<span class="nt">onClick</span><span class="o">:</span> <span class="nt">-</span><span class="o">&amp;</span><span class="nt">gt</span><span class="o">;</span>
+  <span class="nt">console</span><span class="nc">.log</span> <span class="s2">"clicked item"</span><span class="o">,</span> <span class="k">@options</span>
+
+<span class="nt">render</span><span class="o">:</span> <span class="nt">-</span><span class="o">&amp;</span><span class="nt">gt</span><span class="p">;</span>
+  <span class="k">@renderer</span> <span class="k">@tmpl</span> <span class="k">@options</span>
+
+<span class="nt">template</span><span class="nc">.registerHelper</span> <span class="s2">"renderItem"</span><span class="o">,</span> <span class="o">(</span><span class="nt">data</span> <span class="o">=</span> <span class="p">{}</span><span class="o">)</span> <span class="nt">-</span><span class="o">&amp;</span><span class="nt">gt</span><span class="p">;</span>
+<span class="nt">template</span><span class="nc">.addSubView</span> <span class="nt">new</span> <span class="nt">ItemView</span> <span class="nt">data</span>
+
+<span class="nt">class</span> <span class="nt">ListView</span> <span class="nt">extends</span> <span class="nt">View</span>
+
+<span class="nt">tmpl</span><span class="o">:</span> <span class="nt">template</span><span class="nc">.compile</span> <span class="s2">"""</span>
+<span class="s2">  &amp;lt;ul&amp;gt;</span>
+<span class="s2">    {{#each items}}</span>
+<span class="s2">      &amp;lt;li&amp;gt;{{renderItem this}}&amp;lt;/li&amp;gt;</span>
+<span class="s2">    {{/each}}</span>
+<span class="s2">  &amp;lt;/ul&amp;gt;</span>
+<span class="s2">  """</span>
+
+<span class="nt">el</span><span class="o">:</span> <span class="s2">"#myList"</span>
+
+<span class="nt">render</span><span class="o">:</span> <span class="nt">-</span><span class="o">&amp;</span><span class="nt">gt</span><span class="p">;</span>
+  <span class="k">@renderer</span> <span class="k">@tmpl</span> <span class="k">@options</span>
+
+<span class="nt">items</span> <span class="o">=</span> <span class="cp">[</span>
+<span class="p">{</span><span class="nx">uri</span><span class="p">:</span> <span class="s2">"uri1"</span><span class="p">,</span> <span class="nb">label</span><span class="p">:</span> <span class="s2">"label1"</span><span class="p">}</span>
+<span class="p">{</span><span class="nx">uri</span><span class="p">:</span> <span class="s2">"uri2"</span><span class="p">,</span> <span class="nb">label</span><span class="p">:</span> <span class="s2">"label2"</span><span class="p">}</span>
+<span class="p">{</span><span class="nx">uri</span><span class="p">:</span> <span class="s2">"uri3"</span><span class="p">,</span> <span class="nb">label</span><span class="p">:</span> <span class="s2">"label3"</span><span class="p">}</span>
+<span class="cp">]</span>
+<span class="nt">new</span> <span class="nt">ListView</span><span class="o">(</span><span class="p">{</span><span class="nt">items</span><span class="p">}</span><span class="o">)</span><span class="nc">.render</span><span class="o">()</span>
+</div>
+<p>Note that there are tons of ways to render sub-views and I have no idea which is the best.</p>
+<p>I choose this one because I did not want to have a strong coupling between <code>ListView</code> and <code>ItemView</code>, this way it is the <code>renderItem</code> helper that defines the view to bind. It is then possible either to change the view in the helper, or the helper called in the template, instead of having to deal with the View classes.</p>
+<p>In a future part 3 of this series, I will focus on creating and managing widgets as simple UI components in a page.</p>
+</div></article><footer><section id="related"><h3>Related Posts</h3><nav class="linklist"><li><span>May 27 2013</span> »&nbsp;<a href="/posts/modular-design-and-librairies-abstraction">Client-side architecture, part 1: Modular design and librairies abstraction</a></li></nav></section></footer></div></div><aside class="col col-lg-3"><h2>About</h2><p>Hello, I'm Paul, a Freelance full-stack Web developer from France focusing on modern JavaScript technologies. <a href="/pages/about">Learn more</a></p><p><a href="/pages/projects">View projects</a></p></aside></div><footer class="container"><div class="pull-right"><div class="twitter-follow-button social-button">
+	<a href="https://twitter.com/paul_lecam" class="twitter-follow-button" data-show-count="false">Follow @paul_lecam</a>
+	<script type="text/javascript" src="http://www.google-analytics.com/ga.js"></script><script id="twitter-wjs" src="//platform.twitter.com/widgets.js"></script><script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0];if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src="//platform.twitter.com/widgets.js";fjs.parentNode.insertBefore(js,fjs);}}(document,"script","twitter-wjs");</script>
+</div><div class="github-follow-button social-button">
+	<iframe src="//ghbtns.com/github-btn.html?user=PaulLeCam&amp;type=follow&amp;count=true" allowtransparency="true" frameborder="0" scrolling="0" width="165" height="20"></iframe>
+</div></div><div>© Paul Le Cam 2013</div><div>Posts on this blog are licensed under a
+<a rel="license" href="http://creativecommons.org/licenses/by-nc-sa/3.0/" target="_blank">Creative Commons Attribution-NonCommercial-ShareAlike 3.0 Unported License</a>.<br />
+<a rel="license" href="http://creativecommons.org/licenses/by-nc-sa/3.0/" target="_blank"><img alt="Creative Commons License" style="border-width:0" src="http://i.creativecommons.org/l/by-nc-sa/3.0/88x31.png" /></a></div></footer><!-- Scripts--><script>var _gaq = _gaq || [];
+_gaq.push(['_setAccount', 'UA-39711178-1']);
+_gaq.push(['_trackPageview']);
+(function(){
+	var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+	ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+	var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+})();</script><script defer="defer" src="/vendor/prettify.js"></script><script defer="defer" src="/vendor/jquery.js"></script><script defer="defer" src="/vendor/twitter-bootstrap/js/bootstrap.min.js"></script><script defer="defer" src="/vendor/log.js"></script><script defer="defer" src="/vendor/modernizr.js"></script><script defer="defer" src="/scripts/script.js"></script></body></html>

@@ -3,7 +3,7 @@ layout: default
 ---
 
 article#post.post
-  - if (typeof document.series != "undefined")
+  if (typeof document.series != "undefined")
     h2.series= document.series
   h1= document.title
   .meta.clearfix
@@ -20,4 +20,8 @@ footer
           li
             span= moment(doc.date).format("LL")
             |  &raquo;&nbsp;
-            a(href=doc.url)= doc.title
+            a(href=doc.url)
+              if (typeof doc.series != "undefined")
+                != doc.series
+                | : 
+              != doc.title

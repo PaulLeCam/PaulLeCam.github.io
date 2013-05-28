@@ -1,34 +1,34 @@
 <!DOCTYPE html><html lang="en"><head><!-- Meta--><meta charset="utf-8"><meta http-equiv="content-type" content="text/html; charset=utf-8"><meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1"><title>Modular design and librairies abstraction | Full-stack stuff</title><meta name="description" content="Personal blog about full-stack developement in JavaScript/CoffeeScript with Node, Require, Backbone, Handlebars..."><meta name="keywords" content="javascript, coffeescript, node, nodejs, require, requirejs, backbone, backbonejs, handlebars"><meta name="author" content="Paul Le Cam"><meta http-equiv="X-Powered-By" content="DocPad v6.35.0"/><meta name="viewport" content="width=device-width"><!-- Icons--><link rel="shortcut icon" href="ico/favicon.ico"><link rel="apple-touch-icon-precomposed" sizes="144x144" href="ico/apple-touch-icon-144-precomposed.png"><link rel="apple-touch-icon-precomposed" sizes="114x114" href="ico/apple-touch-icon-114-precomposed.png"><link rel="apple-touch-icon-precomposed" sizes="72x72" href="ico/apple-touch-icon-72-precomposed.png"><link rel="apple-touch-icon-precomposed" href="ico/apple-touch-icon-57-precomposed.png"><!--[if lt IE 9]><script async src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script><![endif]--><!-- Styles--><link  rel="stylesheet" href="/vendor/prettify.css" /><link  rel="stylesheet" href="/vendor/twitter-bootstrap/css/bootstrap.css" /><link  rel="stylesheet" href="/styles/style.css" /></head><body><header class="container"><h1><a href="/"><img src="/img/logo32.png">Full-stack stuff</a></h1></header><div class="main container"><div class="col col-lg-9"><div id="content"><article id="post" class="post"><h2 class="series">Client-side architecture, part 1</h2><h1>Modular design and librairies abstraction</h1><div class="meta clearfix"><i>May 27 2013</i></div><div class="post-content"><h2>Background</h2>
 <p>About a year ago, I started to use <a href="https://github.com/aurajs/aura">Aura</a> (Backbone-Aura at the time), a project by <a href="http://addyosmani.com/">Addy Osmani</a> to present a clean structure for client-side code, following <a href="http://www.nczonline.net/">Nicholas Zakas</a>&#39; principles introduced in <a href="http://www.slideshare.net/nzakas/scalable-javascript-application-architecture">this presentation</a>.
-I discovered it at a very convenient time for me, as I was starting to use Require and Backbone for all my client-side code, and Aura presented an interesting architecture for it, as well as implementing concepts from Zakas.</p>
+I discovered it at a very convenient time for me, as I was starting to use <a href="http://requirejs.org/">Require</a> and <a href="http://backbonejs.org">Backbone</a> for all my client-side code, and Aura presented an interesting architecture for it, as well as implementing concepts from Zakas.</p>
 <p>At the time, the project was in version 0.7 and used Backbone as a framework. The core was very simple to understand and use, so even though it was not very modular, it was very easy to customize for my applications needs.
 Recent evolutions of Aura, with the release of version 0.9, unfortunately did not match my needs any more. The code feels more complex, and the choice to be used with any framework instead of only Backbone, if propbably interesting in a general manner, is more a constraint for me than anything.
 So instead of continuing to customize Aura according to my needs, I went back to the basics of the concepts, and I ended up using a dead-simple architecture that just does the job.</p>
 <h2>Using modules</h2>
-<p>This one is easy: Require does it for you.
-Define your modules with their dependencies, assemble them in one or different files in your build process using r.js optimizer, and dynamically load them in you code if you need.</p>
+<p>This one is easy: <a href="http://requirejs.org/">Require</a> does it for you.</p>
+<p>Define your modules with their dependencies, assemble them in one or different files in your build process using <a href="http://requirejs.org/docs/optimization.html">r.js optimizer</a>, and dynamically load them in you code if you need.</p>
 <h2>The core - abstracting librairies</h2>
-<p>I use LoDash and jQuery in all my applications, so it felt like I would just need them anyway, but still I wanted to abstract them somehow beacuse, the same way I replaced underscore by LoDash, I could use Zepto instead of jQuery. I needed a way to make these changes in a single place of my application and be sure other modules depending on it would still work as expected.</p>
+<p>I use <a href="http://lodash.com/">Lo-Dash</a> and <a href="http://jquery.com/">jQuery</a> in all my applications, so it felt like I would just need them anyway, but still I wanted to abstract them somehow beacuse, the same way I replaced underscore by Lo-Dash, I could use Zepto instead of jQuery. I needed a way to make these changes in a single place of my application and be sure other modules depending on it would still work as expected.</p>
 <p>I ended-up splitting the librairies into core functionnalities I was using:</p>
 <ul>
-<li>util: common utilities, it is just and alias for LoDash</li>
-<li>template: alias for Handlebars</li>
-<li>dom: a subset of jQuery DOM functions, such as <code>find()</code>, <code>data()</code> and events (<code>on()</code>, <code>off()</code>, <code>ready()</code>...)</li>
-<li>http: a subset of jQuery AJAX functions, such as <code>$.ajax()</code>, <code>$.get()</code>, <code>$.post()</code>...</li>
-<li>promise: an alias to jQuery&#39;s <code>$.Deferred()</code> and <code>$.when()</code></li>
-<li>events: alias for Backbone&#39;s Events, with an <code>emit()</code> function aliasing to <code>trigger()</code> in order to match Node&#39;s EventEmitter</li>
-<li>mvc: alias for Backbone&#39;s Model, View and Collection</li>
-<li>routing: alias for Backbone&#39;s Router and <code>history.start()</code></li>
+<li><strong>util</strong>: common utilities, it is just and alias for Lo-Dash</li>
+<li><strong>template</strong>: alias for Handlebars</li>
+<li><strong>dom</strong>: a subset of jQuery DOM functions, such as <code>find()</code>, <code>data()</code> and events (<code>on()</code>, <code>off()</code>, <code>ready()</code>...)</li>
+<li><strong>http</strong>: a subset of jQuery AJAX functions, such as <code>$.ajax()</code>, <code>$.get()</code>, <code>$.post()</code>...</li>
+<li><strong>promise</strong>: an alias to jQuery&#39;s <code>$.Deferred()</code> and <code>$.when()</code></li>
+<li><strong>events</strong>: alias for Backbone&#39;s Events, with an <code>emit()</code> function aliasing to <code>trigger()</code> in order to match Node&#39;s EventEmitter</li>
+<li><strong>mvc</strong>: alias for Backbone&#39;s Model, View and Collection</li>
+<li><strong>routing</strong>: alias for Backbone&#39;s Router and <code>history.start()</code></li>
 </ul>
 <p>This way I could easily load dependencies in my modules in terms of functionalities instead of librairies, and already provide some form of sandboxing, as a module loading the <code>http</code> module would not have access to the <code>dom</code> functions, as it would if it had simply loaded jQuery, which is very useful to ensure the separation of concerns.</p>
 <p>I also added some of my own abstraction to these core modules:</p>
 <ul>
-<li>dev: an alias to the console having to be explicitely activated, with polyfills for <code>time()</code> and <code>timeEnd()</code></li>
-<li>store: a simple key/value store class with convenient methods</li>
-<li>command: an implementation of the command pattern using promises</li>
+<li><strong>dev</strong>: an alias to the console having to be explicitely activated, with polyfills for <code>time()</code> and <code>timeEnd()</code></li>
+<li><strong>store</strong>: a simple key/value store class with convenient methods</li>
+<li><strong>command</strong>: an implementation of the <a href="http://addyosmani.com/resources/essentialjsdesignpatterns/book/#commandpatternjavascript">command pattern</a> using promises</li>
 </ul>
-<p>All these very simple modules then served as a basis for creating a modular framework, easily extensible, that I will present in an incoming post.</p>
-</div></article><footer></footer></div></div><aside class="col col-lg-3"><h2>About</h2><p>Hello, I'm Paul Le Cam, a Freelance full-stack Web developer from France focusing on modern JavaScript technologies. <a href="/pages/about">Learn more</a></p><p><a href="/pages/projects">View projects</a></p></aside></div><footer class="container"><div class="pull-right"><div class="twitter-follow-button social-button">
+<p>All these very simple modules then served as a basis for creating a modular framework, easily extensible, that is presented in <a href="/posts/make-your-own-framework/">part 2</a>.</p>
+</div></article><footer><section id="related"><h3>Related Posts</h3><nav class="linklist"><li><span>May 28 2013</span> &raquo;&nbsp;<a href="/posts/make-your-own-framework">Client-side architecture, part 2: Make your own framework</a></li></nav></section></footer></div></div><aside class="col col-lg-3"><h2>About</h2><p>Hello, I'm Paul, a Freelance full-stack Web developer from France focusing on modern JavaScript technologies. <a href="/pages/about">Learn more</a></p><p><a href="/pages/projects">View projects</a></p></aside></div><footer class="container"><div class="pull-right"><div class="twitter-follow-button social-button">
 	<a href="https://twitter.com/paul_lecam" class="twitter-follow-button" data-show-count="false">Follow @paul_lecam</a>
 	<script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0];if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src="//platform.twitter.com/widgets.js";fjs.parentNode.insertBefore(js,fjs);}}(document,"script","twitter-wjs");</script>
 </div><div class="github-follow-button social-button">
