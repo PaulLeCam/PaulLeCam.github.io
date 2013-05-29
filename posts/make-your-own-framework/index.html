@@ -8,99 +8,95 @@ The goal was to abstract these underlying librairies, in order to customize thei
 <p>The idea of sharing models between views is that a specific model should not require to be instanciated multiple times.</p>
 <p>If you have an "user" model, it may be used by different views on the page, that may require different attributes from this model. Instead of creating the user model multiple times, we can ensure that only one exists for a specific <code>id</code>, and contains all the attributes we may need.</p>
 <p>Here is how I extend the Model constructor:</p>
-<div class="highlight highlighted codehilite"><span class="cp"># Each Model class must have its own store of instances</span>
-<span class="nl">store:</span> <span class="n">new</span> <span class="n">Store</span>
+<pre class="highlighted"><code class="coffeescript"><span class="comment"># Each Model class must have its own store of instances</span>
+store: <span class="keyword">new</span> Store
 
-<span class="cp"># When we instanciate a model, we check in the store if it is not already present.</span>
-<span class="cp"># If this is the case, we silently update its data.</span>
-<span class="nl">constructor:</span> <span class="p">(</span><span class="n">params</span> <span class="o">=</span> <span class="p">{})</span> <span class="o">-&amp;</span><span class="n">gt</span><span class="p">;</span>
-  <span class="k">if</span> <span class="p">(</span><span class="n">id</span> <span class="o">=</span> <span class="n">params</span><span class="p">.</span><span class="n">id</span> <span class="n">or</span> <span class="n">params</span><span class="p">.</span><span class="n">cid</span><span class="p">)</span> <span class="n">and</span> <span class="n">self</span> <span class="o">=</span> <span class="err">@</span><span class="n">store</span><span class="p">.</span><span class="n">get</span> <span class="n">id</span>
-    <span class="n">self</span><span class="p">.</span><span class="n">set</span> <span class="n">params</span><span class="p">,</span> <span class="n">silent</span><span class="o">:</span> <span class="n">yes</span>
-    <span class="k">return</span> <span class="n">self</span>
+<span class="comment"># When we instanciate a model, we check in the store if it is not already present.</span>
+<span class="comment"># If this is the case, we silently update its data.</span>
+constructor: (params = {}) -&gt;
+  <span class="keyword">if</span> (id = params.id <span class="keyword">or</span> params.cid) <span class="keyword">and</span> self = <span class="property">@store</span>.get id
+    self.set params, silent: <span class="literal">yes</span>
+    <span class="keyword">return</span> self
 
-  <span class="n">super</span> <span class="n">params</span>
-  <span class="n">key</span> <span class="o">=</span> <span class="err">@</span><span class="n">id</span> <span class="o">?</span> <span class="err">@</span><span class="n">cid</span>
-  <span class="err">@</span><span class="n">store</span><span class="p">.</span><span class="n">set</span> <span class="n">key</span><span class="p">,</span> <span class="err">@</span>
-</div>
+  <span class="keyword">super</span> params
+  key = <span class="property">@id</span> ? <span class="property">@cid</span>
+  <span class="property">@store</span>.set key, @</code></pre>
 <p>This is very basic: every Model contains an internal registry, <code>@store</code>, that contains its instances identified by <code>id</code> or <code>cid</code>. If the instance is present in the registry, it gets updated with possible new data and directly returned. Otherwise, it is normally created and added to the registry.</p>
 <p>As stated in the SoundCloud engineering blog post, it is an application of the <a href="http://addyosmani.com/resources/essentialjsdesignpatterns/book/#factorypatternjavascript">factory pattern</a> directly in the constructor, allowing to simply use <code>user = new User(id: 123)</code> and actually retrieve the user with all the attributes previously set.</p>
 <p>Note that, again as stated in the article, this may not be very memory-efficient and a more advanced caching system would be interesting to auto-delete unused instances after some time.</p>
 <h3>Rendering sub-views</h3>
 <p>A limit often presented with Backbone is the ability to simply render sub-views, meaning for example the ability to render each item in a list when rendering the list, and ensuring the events are correctly bound.</p>
 <p>This is why I augment Handlebars (the <code>template</code> object in the following code) with custom functions to ensure this goal:</p>
-<div class="highlight highlighted codehilite"><span class="cp"># Local store for subviews</span>
-<span class="n">subviews</span> <span class="o">=</span> <span class="n">new</span> <span class="n">Store</span>
+<pre class="highlighted"><code class="coffeescript"><span class="comment"># Local store for subviews</span>
+subviews = <span class="keyword">new</span> Store
 
-<span class="cp"># Add a view to the local store and return a DOM element that we can identify</span>
-<span class="n">template</span><span class="p">.</span><span class="n">addSubView</span> <span class="o">=</span> <span class="p">(</span><span class="n">view</span><span class="p">)</span> <span class="o">-&amp;</span><span class="n">gt</span><span class="p">;</span>
-  <span class="n">subviews</span><span class="p">.</span><span class="n">set</span> <span class="n">view</span><span class="p">.</span><span class="n">cid</span><span class="p">,</span> <span class="n">view</span>
-  <span class="n">new</span> <span class="n">template</span><span class="p">.</span><span class="n">SafeString</span> <span class="s">"&amp;lt;view data-cid=</span><span class="se">\"</span><span class="s">#{ view.cid }</span><span class="se">\"</span><span class="s">&amp;gt;&amp;lt;/view&amp;gt;"</span>
+<span class="comment"># Add a view to the local store and return a DOM element that we can identify</span>
+template.<span class="function"><span class="title">addSubView</span></span> = (view) -&gt;
+  subviews.set view.cid, view
+  <span class="keyword">new</span> template.SafeString <span class="string">"&lt;view data-cid=\"<span class="subst">#{ view.cid }</span>\"&gt;&lt;/view&gt;"</span>
 
-<span class="cp"># Return the DOM element of a stored view and delete it from the store</span>
-<span class="n">template</span><span class="p">.</span><span class="n">renderSubView</span> <span class="o">=</span> <span class="p">(</span><span class="n">cid</span><span class="p">)</span> <span class="o">-&amp;</span><span class="n">gt</span><span class="p">;</span>
-  <span class="k">if</span> <span class="n">view</span> <span class="o">=</span> <span class="n">subviews</span><span class="p">.</span><span class="n">get</span> <span class="n">cid</span>
-    <span class="n">subviews</span><span class="p">.</span><span class="n">delete</span> <span class="n">cid</span>
-    <span class="n">view</span><span class="p">.</span><span class="n">render</span><span class="p">().</span><span class="n">el</span>
-  <span class="k">else</span> <span class="s">""</span>
+<span class="comment"># Return the DOM element of a stored view and delete it from the store</span>
+template.<span class="function"><span class="title">renderSubView</span></span> = (cid) -&gt;
+  <span class="keyword">if</span> view = subviews.get cid
+    subviews.<span class="keyword">delete</span> cid
+    view.render().el
+  <span class="keyword">else</span> <span class="string">""</span>
 
-<span class="cp"># Render all subviews present in a DOM element identified by a jQuery object</span>
-<span class="n">template</span><span class="p">.</span><span class="n">renderSubViews</span> <span class="o">=</span> <span class="p">(</span><span class="err">$</span><span class="n">el</span><span class="p">)</span> <span class="o">-&amp;</span><span class="n">gt</span><span class="p">;</span>
-  <span class="err">$</span><span class="n">el</span><span class="p">.</span><span class="n">find</span><span class="p">(</span><span class="s">"view"</span><span class="p">).</span><span class="n">each</span> <span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">view</span><span class="p">)</span> <span class="o">-&amp;</span><span class="n">gt</span><span class="p">;</span>
-    <span class="err">$</span><span class="n">view</span> <span class="o">=</span> <span class="err">$</span><span class="n">el</span><span class="p">.</span><span class="n">find</span> <span class="n">view</span>
-    <span class="err">$</span><span class="n">view</span><span class="p">.</span><span class="n">replaceWith</span> <span class="n">template</span><span class="p">.</span><span class="n">renderSubView</span> <span class="err">$</span><span class="n">view</span><span class="p">.</span><span class="n">data</span> <span class="s">"cid"</span>
-</div>
+<span class="comment"># Render all subviews present in a DOM element identified by a jQuery object</span>
+template.<span class="function"><span class="title">renderSubViews</span></span> = ($el) -&gt;
+  $el.find(<span class="string">"view"</span>).each (i, view) -&gt;
+    $view = $el.find view
+    $view.replaceWith template.renderSubView $view.data <span class="string">"cid"</span></code></pre>
 <p>First, we need to store the sub-view of the item and return a placeholder <code>view</code> element for the list to render.</p>
 <p>Then, once the list is rendered, we call <code>renderSubViews()</code> on its element to iterate through the placeholders and replace them with the actual item content.</p>
 <p>This last function is then used in a method added to the View class:</p>
-<div class="highlight highlighted codehilite"><span class="cp"># The `renderer()` set the HTML content for the element and render eventual associated subviews</span>
-<span class="nl">renderer:</span> <span class="p">(</span><span class="n">html</span><span class="p">)</span> <span class="o">-&amp;</span><span class="n">gt</span><span class="p">;</span>
-  <span class="err">@$</span><span class="n">el</span>
-    <span class="p">.</span><span class="n">attr</span><span class="p">(</span><span class="s">"data-view"</span><span class="p">,</span> <span class="err">@</span><span class="n">cid</span><span class="p">)</span>
-    <span class="p">.</span><span class="n">html</span> <span class="n">html</span>
-  <span class="n">template</span><span class="p">.</span><span class="n">renderSubViews</span> <span class="err">@$</span><span class="n">el</span>
-  <span class="err">@</span>
-</div>
+<pre class="highlighted"><code class="coffeescript"><span class="comment"># The `renderer()` set the HTML content for the element and render eventual associated subviews</span>
+renderer: (html) -&gt;
+  <span class="property">@$el</span>
+    .attr(<span class="string">"data-view"</span>, <span class="property">@cid</span>)
+    .html html
+  template.renderSubViews <span class="property">@$el</span>
+  @</code></pre>
 <p>Here is a full (simple but not tested) example:</p>
-<div class="highlight highlighted codehilite"><span class="nt">class</span> <span class="nt">ItemView</span> <span class="nt">extends</span> <span class="nt">View</span>
+<pre class="highlighted"><code class="coffeescript"><span class="class"><span class="keyword">class</span> <span class="title">ItemView</span> <span class="keyword">extends</span> <span class="title">View</span></span>
 
-<span class="nt">tmpl</span><span class="o">:</span> <span class="nt">template</span><span class="nc">.compile</span> <span class="s2">"""</span>
-<span class="s2">  &amp;lt;a href="</span><span class="p">{</span><span class="err">{</span><span class="n">uri</span><span class="p">}</span><span class="err">}</span><span class="s2">"&amp;gt;{{label}}&amp;lt;/a&amp;gt;</span>
-<span class="s2">  """</span>
+  tmpl: template.compile <span class="string">"""
+    &lt;a href="{{uri}}"&gt;{{label}}&lt;/a&gt;
+    """</span>
 
-<span class="nt">events</span><span class="o">:</span>
-  <span class="s2">"click"</span><span class="o">:</span> <span class="s2">"onClick"</span>
+  events:
+    <span class="string">"click"</span>: <span class="string">"onClick"</span>
 
-<span class="nt">onClick</span><span class="o">:</span> <span class="nt">-</span><span class="o">&amp;</span><span class="nt">gt</span><span class="o">;</span>
-  <span class="nt">console</span><span class="nc">.log</span> <span class="s2">"clicked item"</span><span class="o">,</span> <span class="k">@options</span>
+  onClick: -&gt;
+    console.log <span class="string">"clicked item"</span>, <span class="property">@options</span>
 
-<span class="nt">render</span><span class="o">:</span> <span class="nt">-</span><span class="o">&amp;</span><span class="nt">gt</span><span class="p">;</span>
-  <span class="k">@renderer</span> <span class="k">@tmpl</span> <span class="k">@options</span>
+  render: -&gt;
+    <span class="property">@renderer</span> <span class="property">@tmpl</span> <span class="property">@options</span>
 
-<span class="nt">template</span><span class="nc">.registerHelper</span> <span class="s2">"renderItem"</span><span class="o">,</span> <span class="o">(</span><span class="nt">data</span> <span class="o">=</span> <span class="p">{}</span><span class="o">)</span> <span class="nt">-</span><span class="o">&amp;</span><span class="nt">gt</span><span class="p">;</span>
-<span class="nt">template</span><span class="nc">.addSubView</span> <span class="nt">new</span> <span class="nt">ItemView</span> <span class="nt">data</span>
+template.registerHelper <span class="string">"renderItem"</span>, (data = {}) -&gt;
+  template.addSubView <span class="keyword">new</span> ItemView data
 
-<span class="nt">class</span> <span class="nt">ListView</span> <span class="nt">extends</span> <span class="nt">View</span>
+<span class="class"><span class="keyword">class</span> <span class="title">ListView</span> <span class="keyword">extends</span> <span class="title">View</span></span>
 
-<span class="nt">tmpl</span><span class="o">:</span> <span class="nt">template</span><span class="nc">.compile</span> <span class="s2">"""</span>
-<span class="s2">  &amp;lt;ul&amp;gt;</span>
-<span class="s2">    {{#each items}}</span>
-<span class="s2">      &amp;lt;li&amp;gt;{{renderItem this}}&amp;lt;/li&amp;gt;</span>
-<span class="s2">    {{/each}}</span>
-<span class="s2">  &amp;lt;/ul&amp;gt;</span>
-<span class="s2">  """</span>
+  tmpl: template.compile <span class="string">"""
+    &lt;ul&gt;
+      {{#each items}}
+        &lt;li&gt;{{renderItem this}}&lt;/li&gt;
+      {{/each}}
+    &lt;/ul&gt;
+    """</span>
 
-<span class="nt">el</span><span class="o">:</span> <span class="s2">"#myList"</span>
+  el: <span class="string">"#myList"</span>
 
-<span class="nt">render</span><span class="o">:</span> <span class="nt">-</span><span class="o">&amp;</span><span class="nt">gt</span><span class="p">;</span>
-  <span class="k">@renderer</span> <span class="k">@tmpl</span> <span class="k">@options</span>
+  render: -&gt;
+    <span class="property">@renderer</span> <span class="property">@tmpl</span> <span class="property">@options</span>
 
-<span class="nt">items</span> <span class="o">=</span> <span class="cp">[</span>
-<span class="p">{</span><span class="nx">uri</span><span class="p">:</span> <span class="s2">"uri1"</span><span class="p">,</span> <span class="nb">label</span><span class="p">:</span> <span class="s2">"label1"</span><span class="p">}</span>
-<span class="p">{</span><span class="nx">uri</span><span class="p">:</span> <span class="s2">"uri2"</span><span class="p">,</span> <span class="nb">label</span><span class="p">:</span> <span class="s2">"label2"</span><span class="p">}</span>
-<span class="p">{</span><span class="nx">uri</span><span class="p">:</span> <span class="s2">"uri3"</span><span class="p">,</span> <span class="nb">label</span><span class="p">:</span> <span class="s2">"label3"</span><span class="p">}</span>
-<span class="cp">]</span>
-<span class="nt">new</span> <span class="nt">ListView</span><span class="o">(</span><span class="p">{</span><span class="nt">items</span><span class="p">}</span><span class="o">)</span><span class="nc">.render</span><span class="o">()</span>
-</div>
+items = [
+  {uri: <span class="string">"uri1"</span>, label: <span class="string">"label1"</span>}
+  {uri: <span class="string">"uri2"</span>, label: <span class="string">"label2"</span>}
+  {uri: <span class="string">"uri3"</span>, label: <span class="string">"label3"</span>}
+]
+<span class="keyword">new</span> ListView({items}).render()</code></pre>
 <p>Note that there are tons of ways to render sub-views and I have no idea which is the best.</p>
 <p>I choose this one because I did not want to have a strong coupling between <code>ListView</code> and <code>ItemView</code>, this way it is the <code>renderItem</code> helper that defines the view to bind. It is then possible either to change the view in the helper, or the helper called in the template, instead of having to deal with the View classes.</p>
 <p>In a future part 3 of this series, I will focus on creating and managing widgets as simple UI components in a page.</p>

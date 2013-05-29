@@ -3,7 +3,7 @@
   <title>Full-stack stuff</title>
   <link href="http://paullecam.github.io/atom.xml" rel="self"/>
   <link href="http://paullecam.github.io"/>
-  <updated>2013-05-28T16:08:46.263Z</updated>
+  <updated>2013-05-28T18:23:32.848Z</updated>
   <id>http://paullecam.github.io</id>
   <author>
     <name>Paul Le Cam</name>
@@ -26,99 +26,95 @@ The goal was to abstract these underlying librairies, in order to customize thei
 &lt;p&gt;The idea of sharing models between views is that a specific model should not require to be instanciated multiple times.&lt;/p&gt;
 &lt;p&gt;If you have an &quot;user&quot; model, it may be used by different views on the page, that may require different attributes from this model. Instead of creating the user model multiple times, we can ensure that only one exists for a specific &lt;code&gt;id&lt;/code&gt;, and contains all the attributes we may need.&lt;/p&gt;
 &lt;p&gt;Here is how I extend the Model constructor:&lt;/p&gt;
-&lt;div class=&quot;highlight highlighted codehilite&quot;&gt;&lt;span class=&quot;cp&quot;&gt;# Each Model class must have its own store of instances&lt;/span&gt;
-&lt;span class=&quot;nl&quot;&gt;store:&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;new&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Store&lt;/span&gt;
+&lt;pre class=&quot;highlighted&quot;&gt;&lt;code class=&quot;coffeescript&quot;&gt;&lt;span class=&quot;comment&quot;&gt;# Each Model class must have its own store of instances&lt;/span&gt;
+store: &lt;span class=&quot;keyword&quot;&gt;new&lt;/span&gt; Store
 
-&lt;span class=&quot;cp&quot;&gt;# When we instanciate a model, we check in the store if it is not already present.&lt;/span&gt;
-&lt;span class=&quot;cp&quot;&gt;# If this is the case, we silently update its data.&lt;/span&gt;
-&lt;span class=&quot;nl&quot;&gt;constructor:&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;params&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{})&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;-&amp;amp;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;gt&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
-  &lt;span class=&quot;k&quot;&gt;if&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;id&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;params&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;id&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;or&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;params&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;cid&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;and&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;self&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;err&quot;&gt;@&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;store&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;get&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;id&lt;/span&gt;
-    &lt;span class=&quot;n&quot;&gt;self&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;set&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;params&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;silent&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;yes&lt;/span&gt;
-    &lt;span class=&quot;k&quot;&gt;return&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;self&lt;/span&gt;
+&lt;span class=&quot;comment&quot;&gt;# When we instanciate a model, we check in the store if it is not already present.&lt;/span&gt;
+&lt;span class=&quot;comment&quot;&gt;# If this is the case, we silently update its data.&lt;/span&gt;
+constructor: (params = {}) -&amp;gt;
+  &lt;span class=&quot;keyword&quot;&gt;if&lt;/span&gt; (id = params.id &lt;span class=&quot;keyword&quot;&gt;or&lt;/span&gt; params.cid) &lt;span class=&quot;keyword&quot;&gt;and&lt;/span&gt; self = &lt;span class=&quot;property&quot;&gt;@store&lt;/span&gt;.get id
+    self.set params, silent: &lt;span class=&quot;literal&quot;&gt;yes&lt;/span&gt;
+    &lt;span class=&quot;keyword&quot;&gt;return&lt;/span&gt; self
 
-  &lt;span class=&quot;n&quot;&gt;super&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;params&lt;/span&gt;
-  &lt;span class=&quot;n&quot;&gt;key&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;err&quot;&gt;@&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;id&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;?&lt;/span&gt; &lt;span class=&quot;err&quot;&gt;@&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;cid&lt;/span&gt;
-  &lt;span class=&quot;err&quot;&gt;@&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;store&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;set&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;key&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;err&quot;&gt;@&lt;/span&gt;
-&lt;/div&gt;
+  &lt;span class=&quot;keyword&quot;&gt;super&lt;/span&gt; params
+  key = &lt;span class=&quot;property&quot;&gt;@id&lt;/span&gt; ? &lt;span class=&quot;property&quot;&gt;@cid&lt;/span&gt;
+  &lt;span class=&quot;property&quot;&gt;@store&lt;/span&gt;.set key, @&lt;/code&gt;&lt;/pre&gt;
 &lt;p&gt;This is very basic: every Model contains an internal registry, &lt;code&gt;@store&lt;/code&gt;, that contains its instances identified by &lt;code&gt;id&lt;/code&gt; or &lt;code&gt;cid&lt;/code&gt;. If the instance is present in the registry, it gets updated with possible new data and directly returned. Otherwise, it is normally created and added to the registry.&lt;/p&gt;
 &lt;p&gt;As stated in the SoundCloud engineering blog post, it is an application of the &lt;a href=&quot;http://addyosmani.com/resources/essentialjsdesignpatterns/book/#factorypatternjavascript&quot;&gt;factory pattern&lt;/a&gt; directly in the constructor, allowing to simply use &lt;code&gt;user = new User(id: 123)&lt;/code&gt; and actually retrieve the user with all the attributes previously set.&lt;/p&gt;
 &lt;p&gt;Note that, again as stated in the article, this may not be very memory-efficient and a more advanced caching system would be interesting to auto-delete unused instances after some time.&lt;/p&gt;
 &lt;h3&gt;Rendering sub-views&lt;/h3&gt;
 &lt;p&gt;A limit often presented with Backbone is the ability to simply render sub-views, meaning for example the ability to render each item in a list when rendering the list, and ensuring the events are correctly bound.&lt;/p&gt;
 &lt;p&gt;This is why I augment Handlebars (the &lt;code&gt;template&lt;/code&gt; object in the following code) with custom functions to ensure this goal:&lt;/p&gt;
-&lt;div class=&quot;highlight highlighted codehilite&quot;&gt;&lt;span class=&quot;cp&quot;&gt;# Local store for subviews&lt;/span&gt;
-&lt;span class=&quot;n&quot;&gt;subviews&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;new&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Store&lt;/span&gt;
+&lt;pre class=&quot;highlighted&quot;&gt;&lt;code class=&quot;coffeescript&quot;&gt;&lt;span class=&quot;comment&quot;&gt;# Local store for subviews&lt;/span&gt;
+subviews = &lt;span class=&quot;keyword&quot;&gt;new&lt;/span&gt; Store
 
-&lt;span class=&quot;cp&quot;&gt;# Add a view to the local store and return a DOM element that we can identify&lt;/span&gt;
-&lt;span class=&quot;n&quot;&gt;template&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;addSubView&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;view&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;-&amp;amp;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;gt&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
-  &lt;span class=&quot;n&quot;&gt;subviews&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;set&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;view&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;cid&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;view&lt;/span&gt;
-  &lt;span class=&quot;n&quot;&gt;new&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;template&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;SafeString&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&quot;&amp;amp;lt;view data-cid=&lt;/span&gt;&lt;span class=&quot;se&quot;&gt;\&quot;&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;#{ view.cid }&lt;/span&gt;&lt;span class=&quot;se&quot;&gt;\&quot;&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&amp;amp;gt;&amp;amp;lt;/view&amp;amp;gt;&quot;&lt;/span&gt;
+&lt;span class=&quot;comment&quot;&gt;# Add a view to the local store and return a DOM element that we can identify&lt;/span&gt;
+template.&lt;span class=&quot;function&quot;&gt;&lt;span class=&quot;title&quot;&gt;addSubView&lt;/span&gt;&lt;/span&gt; = (view) -&amp;gt;
+  subviews.set view.cid, view
+  &lt;span class=&quot;keyword&quot;&gt;new&lt;/span&gt; template.SafeString &lt;span class=&quot;string&quot;&gt;&quot;&amp;lt;view data-cid=\&quot;&lt;span class=&quot;subst&quot;&gt;#{ view.cid }&lt;/span&gt;\&quot;&amp;gt;&amp;lt;/view&amp;gt;&quot;&lt;/span&gt;
 
-&lt;span class=&quot;cp&quot;&gt;# Return the DOM element of a stored view and delete it from the store&lt;/span&gt;
-&lt;span class=&quot;n&quot;&gt;template&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;renderSubView&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;cid&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;-&amp;amp;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;gt&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
-  &lt;span class=&quot;k&quot;&gt;if&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;view&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;subviews&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;get&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;cid&lt;/span&gt;
-    &lt;span class=&quot;n&quot;&gt;subviews&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;delete&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;cid&lt;/span&gt;
-    &lt;span class=&quot;n&quot;&gt;view&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;render&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;().&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;el&lt;/span&gt;
-  &lt;span class=&quot;k&quot;&gt;else&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&quot;&quot;&lt;/span&gt;
+&lt;span class=&quot;comment&quot;&gt;# Return the DOM element of a stored view and delete it from the store&lt;/span&gt;
+template.&lt;span class=&quot;function&quot;&gt;&lt;span class=&quot;title&quot;&gt;renderSubView&lt;/span&gt;&lt;/span&gt; = (cid) -&amp;gt;
+  &lt;span class=&quot;keyword&quot;&gt;if&lt;/span&gt; view = subviews.get cid
+    subviews.&lt;span class=&quot;keyword&quot;&gt;delete&lt;/span&gt; cid
+    view.render().el
+  &lt;span class=&quot;keyword&quot;&gt;else&lt;/span&gt; &lt;span class=&quot;string&quot;&gt;&quot;&quot;&lt;/span&gt;
 
-&lt;span class=&quot;cp&quot;&gt;# Render all subviews present in a DOM element identified by a jQuery object&lt;/span&gt;
-&lt;span class=&quot;n&quot;&gt;template&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;renderSubViews&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;err&quot;&gt;$&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;el&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;-&amp;amp;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;gt&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
-  &lt;span class=&quot;err&quot;&gt;$&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;el&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;find&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;view&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;).&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;each&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;i&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;view&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;-&amp;amp;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;gt&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
-    &lt;span class=&quot;err&quot;&gt;$&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;view&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;err&quot;&gt;$&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;el&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;find&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;view&lt;/span&gt;
-    &lt;span class=&quot;err&quot;&gt;$&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;view&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;replaceWith&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;template&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;renderSubView&lt;/span&gt; &lt;span class=&quot;err&quot;&gt;$&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;view&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;data&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&quot;cid&quot;&lt;/span&gt;
-&lt;/div&gt;
+&lt;span class=&quot;comment&quot;&gt;# Render all subviews present in a DOM element identified by a jQuery object&lt;/span&gt;
+template.&lt;span class=&quot;function&quot;&gt;&lt;span class=&quot;title&quot;&gt;renderSubViews&lt;/span&gt;&lt;/span&gt; = ($el) -&amp;gt;
+  $el.find(&lt;span class=&quot;string&quot;&gt;&quot;view&quot;&lt;/span&gt;).each (i, view) -&amp;gt;
+    $view = $el.find view
+    $view.replaceWith template.renderSubView $view.data &lt;span class=&quot;string&quot;&gt;&quot;cid&quot;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;
 &lt;p&gt;First, we need to store the sub-view of the item and return a placeholder &lt;code&gt;view&lt;/code&gt; element for the list to render.&lt;/p&gt;
 &lt;p&gt;Then, once the list is rendered, we call &lt;code&gt;renderSubViews()&lt;/code&gt; on its element to iterate through the placeholders and replace them with the actual item content.&lt;/p&gt;
 &lt;p&gt;This last function is then used in a method added to the View class:&lt;/p&gt;
-&lt;div class=&quot;highlight highlighted codehilite&quot;&gt;&lt;span class=&quot;cp&quot;&gt;# The `renderer()` set the HTML content for the element and render eventual associated subviews&lt;/span&gt;
-&lt;span class=&quot;nl&quot;&gt;renderer:&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;html&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;-&amp;amp;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;gt&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
-  &lt;span class=&quot;err&quot;&gt;@$&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;el&lt;/span&gt;
-    &lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;attr&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;data-view&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;err&quot;&gt;@&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;cid&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
-    &lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;html&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;html&lt;/span&gt;
-  &lt;span class=&quot;n&quot;&gt;template&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;renderSubViews&lt;/span&gt; &lt;span class=&quot;err&quot;&gt;@$&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;el&lt;/span&gt;
-  &lt;span class=&quot;err&quot;&gt;@&lt;/span&gt;
-&lt;/div&gt;
+&lt;pre class=&quot;highlighted&quot;&gt;&lt;code class=&quot;coffeescript&quot;&gt;&lt;span class=&quot;comment&quot;&gt;# The `renderer()` set the HTML content for the element and render eventual associated subviews&lt;/span&gt;
+renderer: (html) -&amp;gt;
+  &lt;span class=&quot;property&quot;&gt;@$el&lt;/span&gt;
+    .attr(&lt;span class=&quot;string&quot;&gt;&quot;data-view&quot;&lt;/span&gt;, &lt;span class=&quot;property&quot;&gt;@cid&lt;/span&gt;)
+    .html html
+  template.renderSubViews &lt;span class=&quot;property&quot;&gt;@$el&lt;/span&gt;
+  @&lt;/code&gt;&lt;/pre&gt;
 &lt;p&gt;Here is a full (simple but not tested) example:&lt;/p&gt;
-&lt;div class=&quot;highlight highlighted codehilite&quot;&gt;&lt;span class=&quot;nt&quot;&gt;class&lt;/span&gt; &lt;span class=&quot;nt&quot;&gt;ItemView&lt;/span&gt; &lt;span class=&quot;nt&quot;&gt;extends&lt;/span&gt; &lt;span class=&quot;nt&quot;&gt;View&lt;/span&gt;
+&lt;pre class=&quot;highlighted&quot;&gt;&lt;code class=&quot;coffeescript&quot;&gt;&lt;span class=&quot;class&quot;&gt;&lt;span class=&quot;keyword&quot;&gt;class&lt;/span&gt; &lt;span class=&quot;title&quot;&gt;ItemView&lt;/span&gt; &lt;span class=&quot;keyword&quot;&gt;extends&lt;/span&gt; &lt;span class=&quot;title&quot;&gt;View&lt;/span&gt;&lt;/span&gt;
 
-&lt;span class=&quot;nt&quot;&gt;tmpl&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;nt&quot;&gt;template&lt;/span&gt;&lt;span class=&quot;nc&quot;&gt;.compile&lt;/span&gt; &lt;span class=&quot;s2&quot;&gt;&quot;&quot;&quot;&lt;/span&gt;
-&lt;span class=&quot;s2&quot;&gt;  &amp;amp;lt;a href=&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;&lt;span class=&quot;err&quot;&gt;{&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;uri&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;&lt;span class=&quot;err&quot;&gt;}&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&quot;&amp;amp;gt;{{label}}&amp;amp;lt;/a&amp;amp;gt;&lt;/span&gt;
-&lt;span class=&quot;s2&quot;&gt;  &quot;&quot;&quot;&lt;/span&gt;
+  tmpl: template.compile &lt;span class=&quot;string&quot;&gt;&quot;&quot;&quot;
+    &amp;lt;a href=&quot;{{uri}}&quot;&amp;gt;{{label}}&amp;lt;/a&amp;gt;
+    &quot;&quot;&quot;&lt;/span&gt;
 
-&lt;span class=&quot;nt&quot;&gt;events&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;:&lt;/span&gt;
-  &lt;span class=&quot;s2&quot;&gt;&quot;click&quot;&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s2&quot;&gt;&quot;onClick&quot;&lt;/span&gt;
+  events:
+    &lt;span class=&quot;string&quot;&gt;&quot;click&quot;&lt;/span&gt;: &lt;span class=&quot;string&quot;&gt;&quot;onClick&quot;&lt;/span&gt;
 
-&lt;span class=&quot;nt&quot;&gt;onClick&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;nt&quot;&gt;-&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;amp;&lt;/span&gt;&lt;span class=&quot;nt&quot;&gt;gt&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;;&lt;/span&gt;
-  &lt;span class=&quot;nt&quot;&gt;console&lt;/span&gt;&lt;span class=&quot;nc&quot;&gt;.log&lt;/span&gt; &lt;span class=&quot;s2&quot;&gt;&quot;clicked item&quot;&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;@options&lt;/span&gt;
+  onClick: -&amp;gt;
+    console.log &lt;span class=&quot;string&quot;&gt;&quot;clicked item&quot;&lt;/span&gt;, &lt;span class=&quot;property&quot;&gt;@options&lt;/span&gt;
 
-&lt;span class=&quot;nt&quot;&gt;render&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;nt&quot;&gt;-&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;amp;&lt;/span&gt;&lt;span class=&quot;nt&quot;&gt;gt&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
-  &lt;span class=&quot;k&quot;&gt;@renderer&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;@tmpl&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;@options&lt;/span&gt;
+  render: -&amp;gt;
+    &lt;span class=&quot;property&quot;&gt;@renderer&lt;/span&gt; &lt;span class=&quot;property&quot;&gt;@tmpl&lt;/span&gt; &lt;span class=&quot;property&quot;&gt;@options&lt;/span&gt;
 
-&lt;span class=&quot;nt&quot;&gt;template&lt;/span&gt;&lt;span class=&quot;nc&quot;&gt;.registerHelper&lt;/span&gt; &lt;span class=&quot;s2&quot;&gt;&quot;renderItem&quot;&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nt&quot;&gt;data&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{}&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;nt&quot;&gt;-&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;amp;&lt;/span&gt;&lt;span class=&quot;nt&quot;&gt;gt&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
-&lt;span class=&quot;nt&quot;&gt;template&lt;/span&gt;&lt;span class=&quot;nc&quot;&gt;.addSubView&lt;/span&gt; &lt;span class=&quot;nt&quot;&gt;new&lt;/span&gt; &lt;span class=&quot;nt&quot;&gt;ItemView&lt;/span&gt; &lt;span class=&quot;nt&quot;&gt;data&lt;/span&gt;
+template.registerHelper &lt;span class=&quot;string&quot;&gt;&quot;renderItem&quot;&lt;/span&gt;, (data = {}) -&amp;gt;
+  template.addSubView &lt;span class=&quot;keyword&quot;&gt;new&lt;/span&gt; ItemView data
 
-&lt;span class=&quot;nt&quot;&gt;class&lt;/span&gt; &lt;span class=&quot;nt&quot;&gt;ListView&lt;/span&gt; &lt;span class=&quot;nt&quot;&gt;extends&lt;/span&gt; &lt;span class=&quot;nt&quot;&gt;View&lt;/span&gt;
+&lt;span class=&quot;class&quot;&gt;&lt;span class=&quot;keyword&quot;&gt;class&lt;/span&gt; &lt;span class=&quot;title&quot;&gt;ListView&lt;/span&gt; &lt;span class=&quot;keyword&quot;&gt;extends&lt;/span&gt; &lt;span class=&quot;title&quot;&gt;View&lt;/span&gt;&lt;/span&gt;
 
-&lt;span class=&quot;nt&quot;&gt;tmpl&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;nt&quot;&gt;template&lt;/span&gt;&lt;span class=&quot;nc&quot;&gt;.compile&lt;/span&gt; &lt;span class=&quot;s2&quot;&gt;&quot;&quot;&quot;&lt;/span&gt;
-&lt;span class=&quot;s2&quot;&gt;  &amp;amp;lt;ul&amp;amp;gt;&lt;/span&gt;
-&lt;span class=&quot;s2&quot;&gt;    {{#each items}}&lt;/span&gt;
-&lt;span class=&quot;s2&quot;&gt;      &amp;amp;lt;li&amp;amp;gt;{{renderItem this}}&amp;amp;lt;/li&amp;amp;gt;&lt;/span&gt;
-&lt;span class=&quot;s2&quot;&gt;    {{/each}}&lt;/span&gt;
-&lt;span class=&quot;s2&quot;&gt;  &amp;amp;lt;/ul&amp;amp;gt;&lt;/span&gt;
-&lt;span class=&quot;s2&quot;&gt;  &quot;&quot;&quot;&lt;/span&gt;
+  tmpl: template.compile &lt;span class=&quot;string&quot;&gt;&quot;&quot;&quot;
+    &amp;lt;ul&amp;gt;
+      {{#each items}}
+        &amp;lt;li&amp;gt;{{renderItem this}}&amp;lt;/li&amp;gt;
+      {{/each}}
+    &amp;lt;/ul&amp;gt;
+    &quot;&quot;&quot;&lt;/span&gt;
 
-&lt;span class=&quot;nt&quot;&gt;el&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s2&quot;&gt;&quot;#myList&quot;&lt;/span&gt;
+  el: &lt;span class=&quot;string&quot;&gt;&quot;#myList&quot;&lt;/span&gt;
 
-&lt;span class=&quot;nt&quot;&gt;render&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;nt&quot;&gt;-&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;amp;&lt;/span&gt;&lt;span class=&quot;nt&quot;&gt;gt&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
-  &lt;span class=&quot;k&quot;&gt;@renderer&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;@tmpl&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;@options&lt;/span&gt;
+  render: -&amp;gt;
+    &lt;span class=&quot;property&quot;&gt;@renderer&lt;/span&gt; &lt;span class=&quot;property&quot;&gt;@tmpl&lt;/span&gt; &lt;span class=&quot;property&quot;&gt;@options&lt;/span&gt;
 
-&lt;span class=&quot;nt&quot;&gt;items&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;cp&quot;&gt;[&lt;/span&gt;
-&lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;uri&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s2&quot;&gt;&quot;uri1&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;label&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s2&quot;&gt;&quot;label1&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
-&lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;uri&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s2&quot;&gt;&quot;uri2&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;label&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s2&quot;&gt;&quot;label2&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
-&lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;uri&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s2&quot;&gt;&quot;uri3&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;label&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s2&quot;&gt;&quot;label3&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
-&lt;span class=&quot;cp&quot;&gt;]&lt;/span&gt;
-&lt;span class=&quot;nt&quot;&gt;new&lt;/span&gt; &lt;span class=&quot;nt&quot;&gt;ListView&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;&lt;span class=&quot;nt&quot;&gt;items&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;)&lt;/span&gt;&lt;span class=&quot;nc&quot;&gt;.render&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;()&lt;/span&gt;
-&lt;/div&gt;
+items = [
+  {uri: &lt;span class=&quot;string&quot;&gt;&quot;uri1&quot;&lt;/span&gt;, label: &lt;span class=&quot;string&quot;&gt;&quot;label1&quot;&lt;/span&gt;}
+  {uri: &lt;span class=&quot;string&quot;&gt;&quot;uri2&quot;&lt;/span&gt;, label: &lt;span class=&quot;string&quot;&gt;&quot;label2&quot;&lt;/span&gt;}
+  {uri: &lt;span class=&quot;string&quot;&gt;&quot;uri3&quot;&lt;/span&gt;, label: &lt;span class=&quot;string&quot;&gt;&quot;label3&quot;&lt;/span&gt;}
+]
+&lt;span class=&quot;keyword&quot;&gt;new&lt;/span&gt; ListView({items}).render()&lt;/code&gt;&lt;/pre&gt;
 &lt;p&gt;Note that there are tons of ways to render sub-views and I have no idea which is the best.&lt;/p&gt;
 &lt;p&gt;I choose this one because I did not want to have a strong coupling between &lt;code&gt;ListView&lt;/code&gt; and &lt;code&gt;ItemView&lt;/code&gt;, this way it is the &lt;code&gt;renderItem&lt;/code&gt; helper that defines the view to bind. It is then possible either to change the view in the helper, or the helper called in the template, instead of having to deal with the View classes.&lt;/p&gt;
 &lt;p&gt;In a future part 3 of this series, I will focus on creating and managing widgets as simple UI components in a page.&lt;/p&gt;

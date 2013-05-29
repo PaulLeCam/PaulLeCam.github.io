@@ -23,7 +23,7 @@ The idea of sharing models between views is that a specific model should not req
 If you have an "user" model, it may be used by different views on the page, that may require different attributes from this model. Instead of creating the user model multiple times, we can ensure that only one exists for a specific `id`, and contains all the attributes we may need.
 
 Here is how I extend the Model constructor:
-```
+```coffeescript
 # Each Model class must have its own store of instances
 store: new Store
 
@@ -48,7 +48,7 @@ Note that, again as stated in the article, this may not be very memory-efficient
 A limit often presented with Backbone is the ability to simply render sub-views, meaning for example the ability to render each item in a list when rendering the list, and ensuring the events are correctly bound.
 
 This is why I augment Handlebars (the `template` object in the following code) with custom functions to ensure this goal:
-```
+```coffeescript
 # Local store for subviews
 subviews = new Store
 
@@ -75,7 +75,7 @@ First, we need to store the sub-view of the item and return a placeholder `view`
 Then, once the list is rendered, we call `renderSubViews()` on its element to iterate through the placeholders and replace them with the actual item content.
 
 This last function is then used in a method added to the View class:
-```
+```coffeescript
 # The `renderer()` set the HTML content for the element and render eventual associated subviews
 renderer: (html) ->
   @$el
@@ -86,7 +86,7 @@ renderer: (html) ->
 ```
 
 Here is a full (simple but not tested) example:
-```
+```coffeescript
 class ItemView extends View
   
   tmpl: template.compile """
