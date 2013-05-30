@@ -7,9 +7,11 @@ header h1 a{color:#fff;}
 header h1 a:hover{color:#fff}
 header h1 a img{margin-right:5px;margin-bottom:5px}
 aside{float:right;border-left:2px solid #6acc28;margin-left:-2px}
-footer{padding:20px 10px}
+@media screen and (max-width: 768px){aside{margin:10px 0;border-left:0;border-top:2px solid #6acc28}
+}footer{padding:20px 10px}
 h1,h2{line-height:auto}
 h2.series{color:#999;font-style:italic;font-size:1.8em;margin-bottom:0}
+h4{font-size:1.4em}
 .meta i{float:left;margin-right:20px}
 .pull-right .social-button{padding:12px 5px;float:left}
 #content .social-button{padding:2px;float:left}

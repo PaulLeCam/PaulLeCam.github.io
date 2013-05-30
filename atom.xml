@@ -3,7 +3,7 @@
   <title>Full-stack stuff</title>
   <link href="http://paullecam.github.io/atom.xml" rel="self"/>
   <link href="http://paullecam.github.io"/>
-  <updated>2013-05-30T11:05:58.052Z</updated>
+  <updated>2013-05-30T11:27:14.803Z</updated>
   <id>http://paullecam.github.io</id>
   <author>
     <name>Paul Le Cam</name>
@@ -74,7 +74,7 @@ With this project, I did not want to experiment new things, I only wanted to ass
 	&lt;script&gt;!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0];if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src=&quot;//platform.twitter.com/widgets.js&quot;;fjs.parentNode.insertBefore(js,fjs);}}(document,&quot;script&quot;,&quot;twitter-wjs&quot;);&lt;/script&gt;
 &lt;/div&gt;&lt;div class=&quot;github-follow-button social-button&quot;&gt;
 	&lt;iframe src=&quot;//ghbtns.com/github-btn.html?user=PaulLeCam&amp;type=follow&amp;count=true&quot; allowtransparency=&quot;true&quot; frameborder=&quot;0&quot; scrolling=&quot;0&quot; width=&quot;165&quot; height=&quot;20&quot;&gt;&lt;/iframe&gt;
-&lt;/div&gt;&lt;/div&gt;&lt;div&gt;© Paul Le Cam 2013&lt;/div&gt;&lt;div&gt;Posts on this blog are licensed under the 
+&lt;/div&gt;&lt;/div&gt;&lt;div&gt;© Paul Le Cam 2013. Posts on this blog are licensed under the 
 &lt;a rel=&quot;license&quot; href=&quot;http://creativecommons.org/licenses/by-nc-sa/3.0/&quot; target=&quot;_blank&quot;&gt;Creative Commons Attribution-NonCommercial-ShareAlike 3.0 Unported License&lt;/a&gt;.&lt;br /&gt;
 &lt;a rel=&quot;license&quot; href=&quot;http://creativecommons.org/licenses/by-nc-sa/3.0/&quot; target=&quot;_blank&quot;&gt;&lt;img alt=&quot;Creative Commons License&quot; style=&quot;border-width:0&quot; src=&quot;http://i.creativecommons.org/l/by-nc-sa/3.0/88x31.png&quot; /&gt;&lt;/a&gt;&lt;/div&gt;&lt;/footer&gt;&lt;!-- Scripts--&gt;&lt;script &gt;var _gaq = _gaq || [];
 _gaq.push(['_setAccount', 'UA-39711178-1']);
@@ -198,7 +198,7 @@ items = [
 	&lt;script&gt;!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0];if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src=&quot;//platform.twitter.com/widgets.js&quot;;fjs.parentNode.insertBefore(js,fjs);}}(document,&quot;script&quot;,&quot;twitter-wjs&quot;);&lt;/script&gt;
 &lt;/div&gt;&lt;div class=&quot;github-follow-button social-button&quot;&gt;
 	&lt;iframe src=&quot;//ghbtns.com/github-btn.html?user=PaulLeCam&amp;type=follow&amp;count=true&quot; allowtransparency=&quot;true&quot; frameborder=&quot;0&quot; scrolling=&quot;0&quot; width=&quot;165&quot; height=&quot;20&quot;&gt;&lt;/iframe&gt;
-&lt;/div&gt;&lt;/div&gt;&lt;div&gt;© Paul Le Cam 2013&lt;/div&gt;&lt;div&gt;Posts on this blog are licensed under the 
+&lt;/div&gt;&lt;/div&gt;&lt;div&gt;© Paul Le Cam 2013. Posts on this blog are licensed under the 
 &lt;a rel=&quot;license&quot; href=&quot;http://creativecommons.org/licenses/by-nc-sa/3.0/&quot; target=&quot;_blank&quot;&gt;Creative Commons Attribution-NonCommercial-ShareAlike 3.0 Unported License&lt;/a&gt;.&lt;br /&gt;
 &lt;a rel=&quot;license&quot; href=&quot;http://creativecommons.org/licenses/by-nc-sa/3.0/&quot; target=&quot;_blank&quot;&gt;&lt;img alt=&quot;Creative Commons License&quot; style=&quot;border-width:0&quot; src=&quot;http://i.creativecommons.org/l/by-nc-sa/3.0/88x31.png&quot; /&gt;&lt;/a&gt;&lt;/div&gt;&lt;/footer&gt;&lt;!-- Scripts--&gt;&lt;script &gt;var _gaq = _gaq || [];
 _gaq.push(['_setAccount', 'UA-39711178-1']);
@@ -250,7 +250,7 @@ So instead of continuing to customize Aura according to my needs, I went back to
 	&lt;script&gt;!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0];if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src=&quot;//platform.twitter.com/widgets.js&quot;;fjs.parentNode.insertBefore(js,fjs);}}(document,&quot;script&quot;,&quot;twitter-wjs&quot;);&lt;/script&gt;
 &lt;/div&gt;&lt;div class=&quot;github-follow-button social-button&quot;&gt;
 	&lt;iframe src=&quot;//ghbtns.com/github-btn.html?user=PaulLeCam&amp;type=follow&amp;count=true&quot; allowtransparency=&quot;true&quot; frameborder=&quot;0&quot; scrolling=&quot;0&quot; width=&quot;165&quot; height=&quot;20&quot;&gt;&lt;/iframe&gt;
-&lt;/div&gt;&lt;/div&gt;&lt;div&gt;© Paul Le Cam 2013&lt;/div&gt;&lt;div&gt;Posts on this blog are licensed under the 
+&lt;/div&gt;&lt;/div&gt;&lt;div&gt;© Paul Le Cam 2013. Posts on this blog are licensed under the 
 &lt;a rel=&quot;license&quot; href=&quot;http://creativecommons.org/licenses/by-nc-sa/3.0/&quot; target=&quot;_blank&quot;&gt;Creative Commons Attribution-NonCommercial-ShareAlike 3.0 Unported License&lt;/a&gt;.&lt;br /&gt;
 &lt;a rel=&quot;license&quot; href=&quot;http://creativecommons.org/licenses/by-nc-sa/3.0/&quot; target=&quot;_blank&quot;&gt;&lt;img alt=&quot;Creative Commons License&quot; style=&quot;border-width:0&quot; src=&quot;http://i.creativecommons.org/l/by-nc-sa/3.0/88x31.png&quot; /&gt;&lt;/a&gt;&lt;/div&gt;&lt;/footer&gt;&lt;!-- Scripts--&gt;&lt;script &gt;var _gaq = _gaq || [];
 _gaq.push(['_setAccount', 'UA-39711178-1']);

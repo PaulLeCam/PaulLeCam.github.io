@@ -84,9 +84,9 @@ html(lang="en")
             a(href="/pages/projects") View projects
 
     footer.container
-      div.pull-right!= getSocialButtons(["TwitterFollow", "GithubFollow"])
-      div= site.copyright
-      div!= site.license
+      
+      .pull-right!= getSocialButtons(["TwitterFollow", "GithubFollow"])
+      div!= site.copyright
 
     // Scripts
     != scripts.toHTML()
