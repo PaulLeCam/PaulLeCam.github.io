@@ -4,7 +4,7 @@ series: Client-side architecture, part 2
 date: '5/28/2013'
 layout: post
 tags: ['client','architecture','framework','require','backbone','jquery']
-abstract: Making your own framework by assembling and customizing components is easy, just make what you need.
+abstract: Making your own framework by assembling and customizing components is easy, just create what you need.
 ---
 
 ## Background

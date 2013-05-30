@@ -45,8 +45,6 @@
     "docpad-plugin-related": "2.x",
     "marked": "*",
     "docpad-plugin-paged": "~2.1.4",
-    "docpad-plugin-ghpages": "~2.0.2",
-    "docpad-plugin-pygments": "~2.0.7",
     "moment": "~2.0.0",
     "docpad-plugin-highlightjs": "~2.1.4",
     "docpad-plugin-services": "~2.2.4"
