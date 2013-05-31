@@ -1,0 +1,46 @@
+<!DOCTYPE html><html lang="en"><head><!-- Meta--><meta charset="utf-8"><meta http-equiv="content-type" content="text/html; charset=utf-8"><meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1"><title>Working with widgets | Full-stack stuff</title><meta name="description" content="Personal blog about full-stack developement in JavaScript/CoffeeScript with Node, Require, Backbone, Handlebars..."><meta name="keywords" content="javascript, coffeescript, node, nodejs, require, requirejs, backbone, backbonejs, handlebars"><meta name="author" content="Paul Le Cam"><meta http-equiv="X-Powered-By" content="DocPad v6.38.0"/><meta name="viewport" content="width=device-width"><!-- Icons--><link rel="shortcut icon" href="ico/favicon.ico"><link rel="apple-touch-icon-precomposed" sizes="144x144" href="ico/apple-touch-icon-144-precomposed.png"><link rel="apple-touch-icon-precomposed" sizes="114x114" href="ico/apple-touch-icon-114-precomposed.png"><link rel="apple-touch-icon-precomposed" sizes="72x72" href="ico/apple-touch-icon-72-precomposed.png"><link rel="apple-touch-icon-precomposed" href="ico/apple-touch-icon-57-precomposed.png"><!--[if lt IE 9]><script async src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script><![endif]--><!-- Styles--><link  rel="stylesheet" href="/vendor/prettify.css" /><link  rel="stylesheet" href="/vendor/twitter-bootstrap/css/bootstrap.css" /><link  rel="stylesheet" href="/styles/style.css" /></head><body><header class="container"><h1><a href="/"><img src="/img/logo32.png">Full-stack stuff</a></h1></header><div class="main container"><div class="col col-lg-9"><div id="content"><article id="post" class="post"><h2 class="series">Client-side architecture, part 3</h2><h1>Working with widgets</h1><div class="meta clearfix"><i>May 31 2013</i></div><div class="post-content"><h2>Background</h2>
+<p>Managing loosely coupled pieces of UI components was one of the main reasons I started to use Aura, as I wrote in <a href="/posts/modular-design-and-librairies-abstraction/">part 1</a>. Nevertheless, I did not need something as advanced as provided by Aura, all I needed was enhanced Backbone views that would be used as widgets.</p>
+<p>The idea of widgets is that there would be simple, independant modules bound to DOM elements, that could easily be dynamically added and removed from the page, as well as being started and stopped at will.</p>
+<h2>Widget class</h2>
+<p>The Widget class simply extends the View one by adding two main methods: <code>start</code> and <code>stop</code>.</p>
+<pre class="highlighted"><code class="coffeescript"><span class="comment"># When starting a widget for the first time, we render it.</span>
+<span class="comment"># Then, later calls to the function will ensure events are bound.</span>
+start: -&gt;
+  <span class="property">@delegateEvents</span>()
+  <span class="keyword">unless</span> <span class="property">@rendered</span>
+    <span class="property">@render</span>()
+    <span class="property">@rendered</span> = <span class="literal">yes</span>
+
+<span class="comment"># Alias to `undelegateEvents()`</span>
+stop: -&gt;
+  <span class="property">@undelegateEvents</span>()</code></pre>
+<p>In their very core, these methods deal with (un)binding the DOM events, but they should also be implemented to manage the mediator events they have to deal with. The <code>start</code> method also ensures the widget is actually rendered.</p>
+<p>The full code for this class can be found <a href="https://github.com/PaulLeCam/slob-client/blob/master/src/ext/framework.coffee#L132">here</a>.</p>
+<h2>Widgets management</h2>
+<p>The application does not directly deal with widgets, one of the main reason is that the widgets code should only be loaded when they are needed, allowing to load less startup code to run the application.</p>
+<p>To manage the widgets lifecycle, a specific modules is loaded and used as a factory by the modules needing to interact with widgets, ensuring a loose coupling.</p>
+<p>This module presents two main functions: <code>start(type, options)</code> and <code>stop(type, element)</code>, allowing the following behavior:</p>
+<ul>
+<li><p>When started for the first time, the Widget class is loaded (the <code>type</code> argument) and an instance is created and initalized with the <code>options</code> argument, that must at least contain an <code>el</code> property to be bound to a DOM element, and is then rendered.</p>
+</li>
+<li><p>The widget can then be stopped by calling the <code>stop(type, element)</code> function, and restarted using the same arguments with the <code>start</code> function, that no longer needs the <code>options</code> argument but only the <code>element</code>.</p>
+</li>
+<li><p>Because the widgets management module keeps track of all widgets, it is also possible to replace one of the arguments by <code>*</code> to start/stop at once all widgets of a certain type, or bound to a certain element.</p>
+</li>
+</ul>
+<p>The full code for this module can be found <a href="https://github.com/PaulLeCam/slob-client/blob/master/src/ext/widgets.coffee">here</a>, also containing functions to load and initialize widgets explicitely, in order to prepare them before being actually used, as well as functions to shut them down (emptying the element&#39;s content) or removing them.</p>
+</div></article><footer><section id="related"><h3>Related Posts</h3><nav class="linklist"><li><span>May 28 2013</span> &raquo;&nbsp;<a href="/posts/make-your-own-framework">Client-side architecture, part 2: Make your own framework</a></li><li><span>May 27 2013</span> &raquo;&nbsp;<a href="/posts/modular-design-and-librairies-abstraction">Client-side architecture, part 1: Modular design and librairies abstraction</a></li><li><span>May 30 2013</span> &raquo;&nbsp;<a href="/posts/shared-modules">Optimizing client-server communication, part 1: Shared modules</a></li></nav></section></footer></div></div><aside class="col col-lg-3"><h2>About</h2><p>Hello, I'm Paul, a Freelance full-stack Web developer from France focusing on modern JavaScript technologies. <a href="/pages/about">Learn more</a></p><p><a href="/pages/projects">View projects</a></p></aside></div><footer class="container"><div class="pull-right"><div class="twitter-follow-button social-button">
+	<a href="https://twitter.com/paul_lecam" class="twitter-follow-button" data-show-count="false">Follow @paul_lecam</a>
+	<script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0];if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src="//platform.twitter.com/widgets.js";fjs.parentNode.insertBefore(js,fjs);}}(document,"script","twitter-wjs");</script>
+</div><div class="github-follow-button social-button">
+	<iframe src="//ghbtns.com/github-btn.html?user=PaulLeCam&type=follow&count=true" allowtransparency="true" frameborder="0" scrolling="0" width="165" height="20"></iframe>
+</div></div><div>© Paul Le Cam 2013. Posts on this blog are licensed under the 
+<a rel="license" href="http://creativecommons.org/licenses/by-nc-sa/3.0/" target="_blank">Creative Commons Attribution-NonCommercial-ShareAlike 3.0 Unported License</a>.<br />
+<a rel="license" href="http://creativecommons.org/licenses/by-nc-sa/3.0/" target="_blank"><img alt="Creative Commons License" style="border-width:0" src="http://i.creativecommons.org/l/by-nc-sa/3.0/88x31.png" /></a></div></footer><!-- Scripts--><script >var _gaq = _gaq || [];
+_gaq.push(['_setAccount', 'UA-39711178-1']);
+_gaq.push(['_trackPageview']);
+(function(){
+	var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+	ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+	var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+})();</script><script defer="defer"  src="/vendor/prettify.js"></script><script defer="defer"  src="/vendor/jquery.js"></script><script defer="defer"  src="/vendor/twitter-bootstrap/js/bootstrap.min.js"></script><script defer="defer"  src="/vendor/log.js"></script><script defer="defer"  src="/vendor/modernizr.js"></script><script defer="defer"  src="/scripts/script.js"></script></body></html>

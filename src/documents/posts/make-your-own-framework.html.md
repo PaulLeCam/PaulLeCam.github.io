@@ -131,4 +131,4 @@ Note that there are tons of ways to render sub-views and I have no idea which is
 
 I choose this one because I did not want to have a strong coupling between `ListView` and `ItemView`, this way it is the `renderItem` helper that defines the view to bind. It is then possible either to change the view in the helper, or the helper called in the template, instead of having to deal with the View classes.
 
-In a future part 3 of this series, I will focus on creating and managing widgets as simple UI components in a page.
+[Part 3 of this series](/posts/working-with-widgets/) focus on creating and managing widgets as simple UI components in a page.
