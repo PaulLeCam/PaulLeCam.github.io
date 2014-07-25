@@ -1,4 +1,1 @@
-Voilà
-=====
-
-Simple static site generator using CSON, React and Gulp
+Personal blog - http://paullecam.github.io

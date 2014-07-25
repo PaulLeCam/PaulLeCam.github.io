@@ -1,27 +1,17 @@
 {
-  "name": "voila-core",
-  "version": "0.0.0",
-  "description": "Simple static site generator using CSON, React and Gulp",
+  "name": "paullecam.github.io",
+  "version": "0.1.0",
+  "description": "Personal blog",
   "scripts": {
     "start": "gulp"
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/PaulLeCam/voila.git"
+    "url": "https://github.com/PaulLeCam/paullecam.github.git"
   },
-  "keywords": [
-    "static",
-    "html",
-    "cson",
-    "react",
-    "gulp"
-  ],
   "author": "Paul Le Cam <paul@ulem.net>",
   "license": "MIT",
-  "bugs": {
-    "url": "https://github.com/PaulLeCam/voila/issues"
-  },
-  "homepage": "https://github.com/PaulLeCam/voila",
+  "homepage": "https://paullecam.github.io",
   "devDependencies": {
     "browserify": "^4.2.3",
     "coffee-script": "^1.7.1",
